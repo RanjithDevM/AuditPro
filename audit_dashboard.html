@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AuditPro — Departmental Store Audit Dashboard | Tamil Nadu</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#06080f;--bg2:#0c0f1a;--bg3:#111627;--card:#131929;--card2:#1a2236;
+  --border:rgba(99,179,255,0.1);--border2:rgba(99,179,255,0.18);
+  --accent:#3b82f6;--accent2:#60a5fa;--accent3:#93c5fd;
+  --gold:#f59e0b;--gold2:#fbbf24;--red:#ef4444;--green:#10b981;--purple:#8b5cf6;
+  --orange:#f97316;--teal:#14b8a6;
+  --text:#e8edf7;--text2:#94a3b8;--text3:#64748b;
+  --glow:0 0 40px rgba(59,130,246,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Mono',monospace;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;}
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.4;}
+
+/* AUTH */
+#auth-screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:radial-gradient(ellipse 80% 80% at 50% -20%,rgba(59,130,246,0.12),transparent),radial-gradient(ellipse 60% 60% at 80% 80%,rgba(139,92,246,0.08),transparent),var(--bg);z-index:1000;}
+.auth-container{width:100%;max-width:960px;display:grid;grid-template-columns:1fr 1fr;min-height:600px;border:1px solid var(--border2);border-radius:24px;overflow:hidden;box-shadow:var(--glow),0 40px 120px rgba(0,0,0,0.6);animation:slideUp 0.6s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+.auth-left{background:linear-gradient(135deg,rgba(59,130,246,0.15),rgba(139,92,246,0.1) 50%,rgba(16,185,129,0.08));padding:60px 50px;display:flex;flex-direction:column;justify-content:space-between;position:relative;overflow:hidden;border-right:1px solid var(--border);}
+.auth-left::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:conic-gradient(from 0deg at 50% 50%,transparent,rgba(59,130,246,0.05) 20%,transparent 40%);animation:spin 20s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.auth-logo{display:flex;align-items:center;gap:12px;position:relative;z-index:1;}
+.auth-logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.auth-logo-text{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;letter-spacing:-0.5px;}
+.auth-logo-text span{color:var(--accent2);}
+.auth-tagline{position:relative;z-index:1;}
+.auth-tagline h2{font-family:'Instrument Serif',serif;font-size:32px;line-height:1.2;color:var(--text);margin-bottom:12px;}
+.auth-tagline h2 em{color:var(--accent2);font-style:italic;}
+.auth-tagline p{color:var(--text2);font-size:12px;line-height:1.7;}
+.auth-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.auth-badge{padding:4px 10px;border-radius:20px;font-size:10px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--accent3);}
+.auth-stats{display:flex;gap:24px;position:relative;z-index:1;}
+.auth-stat-num{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;color:var(--accent2);}
+.auth-stat-label{font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;}
+.auth-right{background:var(--bg2);padding:50px 50px;display:flex;flex-direction:column;justify-content:center;}
+.auth-tabs{display:flex;background:var(--bg3);border-radius:12px;padding:4px;margin-bottom:28px;}
+.auth-tab{flex:1;padding:10px;border:none;background:transparent;color:var(--text2);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;border-radius:8px;transition:all 0.2s;letter-spacing:0.5px;}
+.auth-tab.active{background:var(--card2);color:var(--text);box-shadow:0 2px 8px rgba(0,0,0,0.3);}
+.auth-form-title{font-family:'Syne',sans-serif;font-size:22px;font-weight:700;margin-bottom:4px;}
+.auth-form-sub{color:var(--text2);font-size:12px;margin-bottom:24px;}
+.form-panel{display:none;}.form-panel.active{display:block;}
+.role-selector{display:flex;gap:10px;margin-bottom:20px;}
+.role-btn{flex:1;padding:12px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;cursor:pointer;color:var(--text2);font-family:'DM Mono',monospace;font-size:11px;transition:all 0.2s;text-align:center;}
+.role-btn.selected{border-color:var(--accent);background:rgba(59,130,246,0.1);color:var(--accent2);}
+.role-btn-icon{font-size:18px;display:block;margin-bottom:3px;}
+.form-group{margin-bottom:14px;}
+.form-label{display:block;font-size:10px;color:var(--text2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:5px;}
+.form-input{width:100%;padding:11px 13px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;transition:all 0.2s;outline:none;}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,0.1);}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-primary{width:100%;padding:13px;background:linear-gradient(135deg,var(--accent),#6366f1);border:none;border-radius:10px;color:#fff;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all 0.2s;margin-top:6px;}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 8px 25px rgba(59,130,246,0.35);}
+.auth-divider{text-align:center;color:var(--text3);font-size:11px;margin:14px 0;position:relative;}
+.auth-divider::before,.auth-divider::after{content:'';position:absolute;top:50%;width:42%;height:1px;background:var(--border);}
+.auth-divider::before{left:0;}.auth-divider::after{right:0;}
+.auth-switch{text-align:center;font-size:12px;color:var(--text2);margin-top:14px;}
+.auth-switch a{color:var(--accent2);cursor:pointer;text-decoration:underline;}
+.error-msg{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:9px 13px;color:#fca5a5;font-size:12px;margin-bottom:12px;display:none;}
+
+/* APP */
+#app{display:none;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:255px;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;overflow-y:auto;}
+.sidebar::-webkit-scrollbar{width:4px;}.sidebar::-webkit-scrollbar-thumb{background:var(--border2);}
+.sidebar-logo{padding:20px 22px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.sidebar-logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--accent),var(--purple));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.sidebar-logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:17px;letter-spacing:-0.5px;}
+.sidebar-logo-text span{color:var(--accent2);}
+.sidebar-store{padding:10px 22px;border-bottom:1px solid var(--border);font-size:10px;color:var(--text3);letter-spacing:0.5px;}
+.sidebar-user{padding:14px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.user-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-weight:700;font-size:13px;flex-shrink:0;}
+.user-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.user-role{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--accent2);}
+.user-role.viewer{color:var(--gold2);}
+.sidebar-nav{flex:1;padding:12px 0;}
+.nav-section-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);padding:8px 22px 5px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 22px;cursor:pointer;color:var(--text2);font-size:12px;transition:all 0.15s;border-left:2px solid transparent;margin:1px 0;}
+.nav-item:hover{color:var(--text);background:rgba(59,130,246,0.06);}
+.nav-item.active{color:var(--accent2);background:rgba(59,130,246,0.1);border-left-color:var(--accent);}
+.nav-item-icon{width:16px;text-align:center;font-size:14px;flex-shrink:0;}
+.nav-badge{margin-left:auto;padding:2px 7px;background:rgba(239,68,68,0.2);color:#fca5a5;border-radius:20px;font-size:9px;}
+.nav-badge.gold{background:rgba(245,158,11,0.2);color:var(--gold2);}
+.sidebar-bottom{padding:14px 22px;border-top:1px solid var(--border);}
+.sidebar-bottom-btn{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;color:var(--text2);font-size:12px;transition:all 0.15s;width:100%;background:none;border:none;font-family:'DM Mono',monospace;}
+.sidebar-bottom-btn:hover{color:var(--red);background:rgba(239,68,68,0.08);}
+
+/* MAIN */
+.main-content{margin-left:255px;min-height:100vh;display:flex;flex-direction:column;}
+.topbar{height:62px;background:rgba(11,14,22,0.9);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 28px;gap:14px;position:sticky;top:0;z-index:50;}
+.topbar-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;flex:1;}
+.topbar-search{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:7px 12px;width:260px;transition:all 0.2s;}
+.topbar-search:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,0.1);}
+.topbar-search input{background:none;border:none;outline:none;color:var(--text);font-family:'DM Mono',monospace;font-size:12px;flex:1;}
+.topbar-search input::placeholder{color:var(--text3);}
+.topbar-actions{display:flex;align-items:center;gap:7px;}
+.icon-btn{width:34px;height:34px;border-radius:9px;background:var(--bg3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;color:var(--text2);transition:all 0.15s;position:relative;}
+.icon-btn:hover{color:var(--text);border-color:var(--border2);}
+.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--bg);}
+
+/* PAGES */
+.page{display:none;padding:28px;}
+.page.active{display:block;animation:fadeIn 0.3s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+.page-header{margin-bottom:24px;}
+.page-header h1{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;letter-spacing:-0.5px;margin-bottom:3px;}
+.page-header p{color:var(--text2);font-size:12px;}
+.breadcrumb{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text3);margin-bottom:8px;}
+.breadcrumb span:last-child{color:var(--text2);}
+
+/* METRICS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+.metrics-grid-5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px;}
+.metric-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:relative;overflow:hidden;transition:all 0.2s;cursor:default;}
+.metric-card:hover{border-color:var(--border2);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,0.3);}
+.metric-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+.metric-card.blue::before{background:linear-gradient(90deg,var(--accent),var(--purple));}
+.metric-card.green::before{background:linear-gradient(90deg,var(--green),#34d399);}
+.metric-card.gold::before{background:linear-gradient(90deg,var(--gold),var(--gold2));}
+.metric-card.red::before{background:linear-gradient(90deg,var(--red),#f87171);}
+.metric-card.teal::before{background:linear-gradient(90deg,var(--teal),#5eead4);}
+.metric-card.orange::before{background:linear-gradient(90deg,var(--orange),#fb923c);}
+.metric-icon{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;margin-bottom:10px;}
+.metric-icon.blue{background:rgba(59,130,246,0.15);color:var(--accent2);}
+.metric-icon.green{background:rgba(16,185,129,0.15);color:#34d399;}
+.metric-icon.gold{background:rgba(245,158,11,0.15);color:var(--gold2);}
+.metric-icon.red{background:rgba(239,68,68,0.15);color:#f87171;}
+.metric-icon.teal{background:rgba(20,184,166,0.15);color:#5eead4;}
+.metric-icon.orange{background:rgba(249,115,22,0.15);color:#fb923c;}
+.metric-label{font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--text3);margin-bottom:8px;}
+.metric-value{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;line-height:1;margin-bottom:6px;}
+.metric-change{font-size:10px;color:var(--text2);}
+.metric-change.up{color:var(--green);}.metric-change.down{color:var(--red);}
+
+/* CHARTS */
+.charts-grid{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:20px;}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.chart-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.chart-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.chart-subtitle{color:var(--text3);font-size:10px;margin-top:2px;}
+.chart-actions{display:flex;gap:5px;}
+.chip{padding:3px 9px;border-radius:20px;font-size:10px;cursor:pointer;border:1px solid var(--border);color:var(--text2);background:var(--bg3);transition:all 0.15s;}
+.chip.active{background:rgba(59,130,246,0.15);border-color:var(--accent);color:var(--accent2);}
+.chart-svg{width:100%;overflow:visible;}
+
+/* TABLE */
+.table-card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:20px;}
+.table-header{padding:18px 22px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.table-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.table-subtitle{color:var(--text3);font-size:10px;margin-top:2px;}
+.table-header-actions{display:flex;gap:7px;align-items:center;}
+.btn-sm{padding:6px 12px;border-radius:8px;font-family:'DM Mono',monospace;font-size:10px;cursor:pointer;transition:all 0.15s;border:1px solid var(--border);color:var(--text2);background:var(--bg3);}
+.btn-sm:hover{color:var(--text);border-color:var(--border2);}
+.btn-sm.accent{background:rgba(59,130,246,0.15);border-color:var(--accent);color:var(--accent2);}
+.btn-sm.danger{background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.3);color:#f87171;}
+.btn-sm.success{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.3);color:#34d399;}
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{padding:10px 20px;font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:500;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left;}
+.data-table td{padding:11px 20px;font-size:11px;color:var(--text2);border-bottom:1px solid rgba(99,179,255,0.05);}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(59,130,246,0.04);}
+
+/* BADGES */
+.status-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;}
+.status-badge::before{content:'';width:5px;height:5px;border-radius:50%;}
+.status-badge.pass,.status-badge.filed,.status-badge.valid,.status-badge.compliant,.status-badge.match,.status-badge.active,.status-badge.operational{background:rgba(16,185,129,0.12);color:#34d399;}
+.status-badge.pass::before,.status-badge.filed::before,.status-badge.valid::before,.status-badge.compliant::before,.status-badge.match::before,.status-badge.active::before,.status-badge.operational::before{background:#34d399;box-shadow:0 0 5px #34d399;}
+.status-badge.fail,.status-badge.overdue,.status-badge.expired,.status-badge.non_compliant,.status-badge.shortage,.status-badge.critical,.status-badge.faulty{background:rgba(239,68,68,0.12);color:#f87171;}
+.status-badge.fail::before,.status-badge.overdue::before,.status-badge.expired::before,.status-badge.non_compliant::before,.status-badge.shortage::before,.status-badge.critical::before,.status-badge.faulty::before{background:#f87171;box-shadow:0 0 5px #f87171;}
+.status-badge.warn,.status-badge.warning,.status-badge.pending,.status-badge.renewal_due,.status-badge.near_expiry,.status-badge.under_review,.status-badge.maintenance,.status-badge.damaged{background:rgba(245,158,11,0.12);color:var(--gold2);}
+.status-badge.warn::before,.status-badge.warning::before,.status-badge.pending::before,.status-badge.renewal_due::before,.status-badge.near_expiry::before,.status-badge.under_review::before,.status-badge.maintenance::before,.status-badge.damaged::before{background:var(--gold2);}
+.status-badge.review,.status-badge.excess,.status-badge.applied{background:rgba(139,92,246,0.12);color:#a78bfa;}
+.status-badge.review::before,.status-badge.excess::before,.status-badge.applied::before{background:#a78bfa;}
+.priority-tag{padding:2px 7px;border-radius:4px;font-size:9px;text-transform:uppercase;letter-spacing:0.5px;}
+.priority-tag.high{background:rgba(239,68,68,0.12);color:#f87171;}
+.priority-tag.medium{background:rgba(245,158,11,0.12);color:var(--gold2);}
+.priority-tag.low{background:rgba(16,185,129,0.12);color:#34d399;}
+.risk-bar{width:70px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.risk-fill{height:100%;border-radius:3px;}
+
+/* NOTICES */
+.access-notice{background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:11px;color:var(--gold2);}
+.alert-banner{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:11px;color:#fca5a5;}
+.info-banner{background:rgba(59,130,246,0.08);border:1px solid rgba(59,130,246,0.2);border-radius:10px;padding:12px 16px;display:flex;align-items:center;gap:10px;margin-bottom:14px;font-size:11px;color:var(--accent2);}
+
+/* ACTIVITY */
+.activity-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;}
+.activity-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid rgba(99,179,255,0.05);}
+.activity-item:last-child{border-bottom:none;padding-bottom:0;}
+.activity-dot{width:9px;height:9px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.activity-dot.blue{background:var(--accent);box-shadow:0 0 7px var(--accent);}
+.activity-dot.green{background:var(--green);box-shadow:0 0 7px var(--green);}
+.activity-dot.red{background:var(--red);box-shadow:0 0 7px var(--red);}
+.activity-dot.gold{background:var(--gold);box-shadow:0 0 7px var(--gold);}
+.activity-title{font-size:11px;color:var(--text);margin-bottom:2px;}
+.activity-meta{font-size:10px;color:var(--text3);}
+
+/* DONUT */
+.donut-container{display:flex;flex-direction:column;align-items:center;gap:14px;}
+.legend-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(99,179,255,0.05);font-size:11px;}
+.legend-item:last-child{border-bottom:none;}
+.legend-dot{width:7px;height:7px;border-radius:2px;margin-right:7px;flex-shrink:0;}
+.legend-label{display:flex;align-items:center;color:var(--text2);flex:1;}
+.legend-val{color:var(--text);font-weight:500;}
+.legend-pct{color:var(--text3);font-size:10px;margin-left:6px;}
+
+/* REPORTS */
+.reports-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all 0.2s;}
+.report-card:hover{border-color:var(--border2);transform:translateY(-3px);box-shadow:0 16px 40px rgba(0,0,0,0.3);}
+.report-card-icon{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:14px;}
+.report-card h3{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:6px;}
+.report-card p{font-size:11px;color:var(--text2);line-height:1.6;margin-bottom:14px;}
+.report-meta{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--text3);}
+
+/* SETTINGS */
+.settings-grid{display:grid;grid-template-columns:1fr 2fr;gap:20px;}
+.settings-nav{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:7px;height:fit-content;}
+.settings-nav-item{padding:10px 14px;border-radius:9px;cursor:pointer;color:var(--text2);font-size:12px;display:flex;align-items:center;gap:9px;transition:all 0.15s;}
+.settings-nav-item:hover{color:var(--text);background:rgba(59,130,246,0.06);}
+.settings-nav-item.active{color:var(--accent2);background:rgba(59,130,246,0.1);}
+.settings-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px;}
+.settings-section{margin-bottom:28px;}
+.settings-section:last-child{margin-bottom:0;}
+.settings-section h3{font-family:'Syne',sans-serif;font-weight:700;font-size:13px;margin-bottom:3px;}
+.settings-section p{color:var(--text3);font-size:10px;margin-bottom:16px;}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);}
+.toggle-row:last-child{border-bottom:none;}
+.toggle-label{font-size:12px;color:var(--text);}
+.toggle-sub{font-size:10px;color:var(--text3);margin-top:2px;}
+.toggle{width:42px;height:23px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;cursor:pointer;position:relative;transition:all 0.2s;flex-shrink:0;}
+.toggle.on{background:var(--accent);border-color:var(--accent);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:15px;height:15px;border-radius:50%;background:#fff;transition:all 0.2s;}
+.toggle.on::after{left:22px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:500;display:none;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:18px;padding:28px;width:90%;max-width:580px;max-height:82vh;overflow-y:auto;animation:modalIn 0.3s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes modalIn{from{opacity:0;transform:scale(0.95);}to{opacity:1;transform:scale(1);}}
+.modal-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;margin-bottom:4px;}
+.modal-sub{color:var(--text2);font-size:12px;margin-bottom:22px;}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
+.modal-close-btn{padding:9px 18px;border-radius:9px;border:1px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'DM Mono',monospace;font-size:12px;cursor:pointer;}
+.modal-save-btn{padding:9px 22px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--purple));border:none;color:#fff;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;cursor:pointer;}
+select.form-input{cursor:pointer;}
+
+/* PROGRESS BARS */
+.prog-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin-top:5px;}
+.prog-fill{height:100%;border-radius:3px;}
+
+/* CHATBOT */
+#chatbot{position:fixed;bottom:24px;right:24px;z-index:500;}
+.chat-toggle{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;box-shadow:0 4px 20px rgba(59,130,246,0.4);font-size:22px;transition:all 0.2s;position:relative;}
+.chat-toggle:hover{transform:scale(1.08);}
+.chat-toggle .chat-notif{position:absolute;top:0;right:0;width:15px;height:15px;border-radius:50%;background:var(--red);border:2px solid var(--bg);font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;}
+.chat-window{position:absolute;bottom:62px;right:0;width:350px;background:var(--bg2);border:1px solid var(--border2);border-radius:18px;overflow:hidden;box-shadow:0 20px 80px rgba(0,0,0,0.5);display:none;flex-direction:column;max-height:490px;animation:popUp 0.25s cubic-bezier(0.16,1,0.3,1) both;}
+@keyframes popUp{from{opacity:0;transform:translateY(12px) scale(0.97);}to{opacity:1;transform:none;}}
+.chat-window.open{display:flex;}
+.chat-head{padding:14px 18px;background:linear-gradient(135deg,rgba(59,130,246,0.12),rgba(139,92,246,0.08));border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;}
+.chat-bot-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.chat-bot-name{font-family:'Syne',sans-serif;font-weight:700;font-size:12px;}
+.chat-bot-status{font-size:9px;color:var(--green);display:flex;align-items:center;gap:3px;}
+.chat-bot-status::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--green);display:inline-block;}
+.chat-close{width:26px;height:26px;border-radius:50%;background:var(--bg3);border:none;cursor:pointer;color:var(--text2);display:flex;align-items:center;justify-content:center;font-size:13px;}
+.chat-messages{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px;max-height:300px;}
+.chat-messages::-webkit-scrollbar{width:3px;}.chat-messages::-webkit-scrollbar-thumb{background:var(--border2);}
+.msg{display:flex;gap:7px;max-width:88%;}
+.msg.user{align-self:flex-end;flex-direction:row-reverse;}
+.msg-avatar{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.msg.bot .msg-avatar{background:linear-gradient(135deg,var(--accent),var(--purple));}
+.msg.user .msg-avatar{background:linear-gradient(135deg,var(--gold),#f97316);}
+.msg-bubble{padding:9px 12px;border-radius:13px;font-size:11px;line-height:1.6;}
+.msg.bot .msg-bubble{background:var(--card2);color:var(--text);border-bottom-left-radius:3px;}
+.msg.user .msg-bubble{background:rgba(59,130,246,0.2);color:var(--text);border-bottom-right-radius:3px;}
+.msg-time{font-size:9px;color:var(--text3);margin-top:2px;}
+.chat-suggestions{padding:0 14px 8px;display:flex;gap:5px;flex-wrap:wrap;}
+.suggest-chip{padding:4px 9px;border-radius:20px;background:var(--bg3);border:1px solid var(--border);font-size:9px;color:var(--text2);cursor:pointer;transition:all 0.15s;}
+.suggest-chip:hover{color:var(--accent2);border-color:var(--accent);background:rgba(59,130,246,0.1);}
+.chat-input-area{padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:7px;align-items:center;}
+.chat-input{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:9px;padding:8px 11px;color:var(--text);font-family:'DM Mono',monospace;font-size:11px;outline:none;transition:all 0.2s;resize:none;}
+.chat-input:focus{border-color:var(--accent);}
+.chat-send{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--accent),var(--purple));border:none;cursor:pointer;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;}
+.typing-indicator{display:flex;gap:4px;align-items:center;padding:3px 0;}
+.typing-dot{width:5px;height:5px;border-radius:50%;background:var(--text2);opacity:0.4;animation:typingBounce 1.2s infinite;}
+.typing-dot:nth-child(2){animation-delay:0.2s;}.typing-dot:nth-child(3){animation-delay:0.4s;}
+@keyframes typingBounce{0%,60%,100%{transform:translateY(0);opacity:0.4;}30%{transform:translateY(-4px);opacity:1;}}
+
+::-webkit-scrollbar{width:5px;height:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+@media(max-width:1200px){.metrics-grid,.metrics-grid-5{grid-template-columns:repeat(2,1fr);}.charts-grid{grid-template-columns:1fr;}}
+@media(max-width:768px){.auth-container{grid-template-columns:1fr;max-width:440px;}.auth-left{display:none;}.sidebar{transform:translateX(-100%);}.main-content{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<!-- ===== AUTH ===== -->
+<div id="auth-screen">
+  <div class="auth-container">
+    <div class="auth-left">
+      <div class="auth-logo">
+        <div class="auth-logo-icon">🏬</div>
+        <div class="auth-logo-text">Audit<span>Pro</span></div>
+      </div>
+      <div class="auth-tagline">
+        <h2>Departmental Store<br><em>Audit Dashboard</em></h2>
+        <p>Complete auditing solution for Tamil Nadu departmental stores — GST, Inventory, IT, Legal & Regulatory, HR/Payroll and more.</p>
+        <div class="auth-badges">
+          <span class="auth-badge">🧾 GST Compliance</span>
+          <span class="auth-badge">📦 Inventory Audit</span>
+          <span class="auth-badge">💻 IT Infrastructure</span>
+          <span class="auth-badge">📋 TN Regulatory</span>
+          <span class="auth-badge">👥 HR & Payroll</span>
+          <span class="auth-badge">📜 Licenses</span>
+        </div>
+      </div>
+      <div class="auth-stats">
+        <div class="auth-stat"><div class="auth-stat-num">12+</div><div class="auth-stat-label">Audit Areas</div></div>
+        <div class="auth-stat"><div class="auth-stat-num">TN</div><div class="auth-stat-label">Tamil Nadu</div></div>
+        <div class="auth-stat"><div class="auth-stat-num">GST</div><div class="auth-stat-label">Ready</div></div>
+      </div>
+    </div>
+    <div class="auth-right">
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Sign In</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+      </div>
+      <div id="login-panel" class="form-panel active">
+        <div class="auth-form-title">Welcome back</div>
+        <div class="auth-form-sub">Sign in to your AuditPro account</div>
+        <div class="role-selector">
+          <div class="role-btn selected" id="login-user-btn" onclick="selectLoginRole('user')"><span class="role-btn-icon">👤</span>Auditor</div>
+          <div class="role-btn" id="login-company-btn" onclick="selectLoginRole('company')"><span class="role-btn-icon">🏬</span>Store Admin</div>
+        </div>
+        <div id="login-error" class="error-msg"></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="login-email" type="email" placeholder="you@example.com"></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="login-password" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')handleLogin()"></div>
+        <button class="btn-primary" onclick="handleLogin()">Sign In →</button>
+        <div class="auth-divider">or try demo credentials</div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn-sm" style="flex:1" onclick="fillDemo('user')">👤 Demo Auditor</button>
+          <button class="btn-sm" style="flex:1" onclick="fillDemo('company')">🏬 Demo Admin</button>
+        </div>
+        <div class="auth-switch">Don't have an account? <a onclick="switchAuthTab('register')">Create one</a></div>
+      </div>
+      <div id="register-panel" class="form-panel">
+        <div class="auth-form-title">Create account</div>
+        <div class="auth-form-sub">Join AuditPro today</div>
+        <div class="role-selector">
+          <div class="role-btn selected" id="reg-user-btn" onclick="selectRegRole('user')"><span class="role-btn-icon">👤</span>Auditor</div>
+          <div class="role-btn" id="reg-company-btn" onclick="selectRegRole('company')"><span class="role-btn-icon">🏬</span>Store Admin</div>
+        </div>
+        <div id="reg-error" class="error-msg"></div>
+        <div class="form-row">
+          <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="reg-fname" placeholder="Ravi"></div>
+          <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="reg-lname" placeholder="Kumar"></div>
+        </div>
+        <div class="form-group" id="reg-company-field" style="display:none"><label class="form-label">Store Name</label><input class="form-input" id="reg-company" placeholder="Saravana Stores"></div>
+        <div class="form-group"><label class="form-label">Email Address</label><input class="form-input" id="reg-email" type="email" placeholder="you@store.com"></div>
+        <div class="form-group"><label class="form-label">Password</label><input class="form-input" id="reg-password" type="password" placeholder="Min. 8 characters"></div>
+        <button class="btn-primary" onclick="handleRegister()">Create Account →</button>
+        <div class="auth-switch">Already have an account? <a onclick="switchAuthTab('login')">Sign in</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MAIN APP ===== -->
+<div id="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-icon">🏬</div>
+      <div class="sidebar-logo-text">Audit<span>Pro</span></div>
+    </div>
+    <div class="sidebar-store" id="sidebar-store-name">📍 Tamil Nadu Store Audit</div>
+    <div class="sidebar-user">
+      <div class="user-avatar" id="user-avatar-text">AU</div>
+      <div>
+        <div class="user-name" id="sidebar-username">User Name</div>
+        <div class="user-role" id="sidebar-role">Viewer</div>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Overview</div>
+      <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="nav-item-icon">⬡</span> Dashboard</div>
+      <div class="nav-item" onclick="showPage('analytics',this)"><span class="nav-item-icon">↗</span> Analytics</div>
+      <div class="nav-section-label">Audit Modules</div>
+      <div class="nav-item" onclick="showPage('gst',this)"><span class="nav-item-icon">🧾</span> GST & Tax Audit<span class="nav-badge gold" id="gst-badge"></span></div>
+      <div class="nav-item" onclick="showPage('inventory',this)"><span class="nav-item-icon">📦</span> Inventory Audit<span class="nav-badge" id="inv-badge"></span></div>
+      <div class="nav-item" onclick="showPage('it',this)"><span class="nav-item-icon">💻</span> IT Infrastructure<span class="nav-badge" id="it-badge"></span></div>
+      <div class="nav-item" onclick="showPage('licenses',this)"><span class="nav-item-icon">📋</span> Licenses & Legal<span class="nav-badge" id="lic-badge"></span></div>
+      <div class="nav-item company-nav" onclick="showPage('hr',this)"><span class="nav-item-icon">👥</span> HR & Payroll</div>
+      <div class="nav-section-label">Management</div>
+      <div class="nav-item" onclick="showPage('compliance',this)"><span class="nav-item-icon">✦</span> Compliance</div>
+      <div class="nav-item" onclick="showPage('reports',this)"><span class="nav-item-icon">◫</span> Reports</div>
+      <div class="nav-item company-nav" onclick="showPage('records',this)"><span class="nav-item-icon">⊞</span> Audit Records<span class="nav-badge" id="rec-badge">15</span></div>
+      <div class="nav-item company-nav" onclick="showPage('users',this)"><span class="nav-item-icon">◉</span> Users</div>
+      <div class="nav-item" onclick="showPage('settings',this)"><span class="nav-item-icon">⊛</span> Settings</div>
+    </nav>
+    <div class="sidebar-bottom">
+      <button class="sidebar-bottom-btn" onclick="handleLogout()"><span>⊖</span> Sign Out</button>
+    </div>
+  </nav>
+
+  <div class="main-content">
+    <div class="topbar">
+      <div class="topbar-title" id="page-title">Dashboard</div>
+      <div class="topbar-search"><span style="color:var(--text3);font-size:13px">⌕</span><input type="text" placeholder="Search audits, products, assets..." id="global-search"></div>
+      <div class="topbar-actions">
+        <div class="icon-btn">🔔<span class="notif-dot"></span></div>
+        <div class="icon-btn">🗺</div>
+        <div class="icon-btn" onclick="handleLogout()">⊖</div>
+      </div>
+    </div>
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="page-dashboard" class="page active">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Dashboard</span></div>
+        <h1>Store Audit Overview</h1>
+        <p>Real-time monitoring — Tamil Nadu Departmental Store</p>
+      </div>
+      <div id="user-notice" class="access-notice" style="display:none">⚠️ You are in <strong>read-only mode</strong>. Contact store admin for edit access.</div>
+      <div id="dashboard-alerts"></div>
+      <div class="metrics-grid">
+        <div class="metric-card blue"><div class="metric-icon blue">📋</div><div class="metric-label">Total Audits</div><div class="metric-value" id="m-total">—</div><div class="metric-change up" id="m-passrate">Loading...</div></div>
+        <div class="metric-card green"><div class="metric-icon green">✓</div><div class="metric-label">Passed</div><div class="metric-value" id="m-passed">—</div><div class="metric-change up">Pass rate</div></div>
+        <div class="metric-card red"><div class="metric-icon red">⚠</div><div class="metric-label">Critical Issues</div><div class="metric-value" id="m-critical">—</div><div class="metric-change down">Needs attention</div></div>
+        <div class="metric-card gold"><div class="metric-icon gold">🛡</div><div class="metric-label">Compliance Score</div><div class="metric-value" id="m-compliance">—</div><div class="metric-change up">All frameworks</div></div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card teal"><div class="metric-icon teal">🧾</div><div class="metric-label">GST Issues</div><div class="metric-value" id="m-gst">—</div><div class="metric-change down">Overdue/Mismatch</div></div>
+        <div class="metric-card orange"><div class="metric-icon orange">📦</div><div class="metric-label">Inventory Alerts</div><div class="metric-value" id="m-inv">—</div><div class="metric-change down">Shortage/Expiry</div></div>
+        <div class="metric-card red"><div class="metric-icon red">💻</div><div class="metric-label">IT Alerts</div><div class="metric-value" id="m-it">—</div><div class="metric-change down">Faulty/Outdated</div></div>
+        <div class="metric-card gold"><div class="metric-icon gold">📋</div><div class="metric-label">License Alerts</div><div class="metric-value" id="m-lic">—</div><div class="metric-change down">Expired/Expiring</div></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Audit Category Performance</div><div class="chart-subtitle">Pass rate trend by month</div></div>
+            <div class="chart-actions"><div class="chip active">6M</div><div class="chip">1Y</div></div>
+          </div>
+          <svg class="chart-svg" viewBox="0 0 570 170" height="170">
+            <defs>
+              <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6" stop-opacity="0.28"/><stop offset="100%" stop-color="#3b82f6" stop-opacity="0"/></linearGradient>
+              <linearGradient id="lineGrad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#10b981" stop-opacity="0.18"/><stop offset="100%" stop-color="#10b981" stop-opacity="0"/></linearGradient>
+            </defs>
+            <line x1="0" y1="150" x2="570" y2="150" stroke="rgba(99,179,255,0.07)" stroke-width="1"/>
+            <line x1="0" y1="110" x2="570" y2="110" stroke="rgba(99,179,255,0.07)" stroke-width="1"/>
+            <line x1="0" y1="70" x2="570" y2="70" stroke="rgba(99,179,255,0.07)" stroke-width="1"/>
+            <line x1="0" y1="30" x2="570" y2="30" stroke="rgba(99,179,255,0.07)" stroke-width="1"/>
+            <path d="M20,125 L110,108 L200,88 L290,93 L375,58 L460,48 L550,38 L550,150 L20,150 Z" fill="url(#lineGrad)"/>
+            <path d="M20,138 L110,128 L200,115 L290,118 L375,96 L460,86 L550,75 L550,150 L20,150 Z" fill="url(#lineGrad2)"/>
+            <polyline points="20,125 110,108 200,88 290,93 375,58 460,48 550,38" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="20,138 110,128 200,115 290,118 375,96 460,86 550,75" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="5,3"/>
+            <circle cx="20" cy="125" r="4" fill="#3b82f6"/><circle cx="110" cy="108" r="4" fill="#3b82f6"/>
+            <circle cx="200" cy="88" r="4" fill="#3b82f6"/><circle cx="290" cy="93" r="4" fill="#3b82f6"/>
+            <circle cx="375" cy="58" r="4" fill="#3b82f6"/><circle cx="460" cy="48" r="4" fill="#3b82f6"/>
+            <circle cx="550" cy="38" r="6" fill="#3b82f6" stroke="#fff" stroke-width="2"/>
+            <text x="20" y="165" font-size="8" fill="rgba(100,116,139,0.8)" text-anchor="middle" font-family="DM Mono">OCT</text>
+            <text x="110" y="165" font-size="8" fill="rgba(100,116,139,0.8)" text-anchor="middle" font-family="DM Mono">NOV</text>
+            <text x="200" y="165" font-size="8" fill="rgba(100,116,139,0.8)" text-anchor="middle" font-family="DM Mono">DEC</text>
+            <text x="290" y="165" font-size="8" fill="rgba(100,116,139,0.8)" text-anchor="middle" font-family="DM Mono">JAN</text>
+            <text x="375" y="165" font-size="8" fill="rgba(100,116,139,0.8)" text-anchor="middle" font-family="DM Mono">FEB</text>
+            <text x="460" y="165" font-size="8" fill="rgba(100,116,139,0.8)" text-anchor="middle" font-family="DM Mono">MAR</text>
+            <text x="550" y="165" font-size="8" fill="rgba(100,116,139,0.8)" text-anchor="middle" font-family="DM Mono">APR</text>
+            <rect x="360" y="6" width="7" height="7" rx="2" fill="#3b82f6"/>
+            <text x="372" y="13" font-size="8" fill="rgba(148,163,184,0.9)" font-family="DM Mono">Actual</text>
+            <line x1="415" y1="10" x2="432" y2="10" stroke="#10b981" stroke-width="2" stroke-dasharray="4,2"/>
+            <text x="437" y="13" font-size="8" fill="rgba(148,163,184,0.9)" font-family="DM Mono">Target</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Risk Distribution</div><div class="chart-subtitle">By audit category</div></div></div>
+          <div class="donut-container">
+            <svg viewBox="-1 -1 42 42" width="130" height="130" style="transform:rotate(-90deg)">
+              <circle cx="20" cy="20" r="15.9" fill="none" stroke="#1a2236" stroke-width="8"/>
+              <circle cx="20" cy="20" r="15.9" fill="none" stroke="#ef4444" stroke-width="8" stroke-dasharray="22 78" stroke-dashoffset="0"/>
+              <circle cx="20" cy="20" r="15.9" fill="none" stroke="#f59e0b" stroke-width="8" stroke-dasharray="18 82" stroke-dashoffset="-22"/>
+              <circle cx="20" cy="20" r="15.9" fill="none" stroke="#10b981" stroke-width="8" stroke-dasharray="14 86" stroke-dashoffset="-40"/>
+              <circle cx="20" cy="20" r="15.9" fill="none" stroke="#8b5cf6" stroke-width="8" stroke-dasharray="10 90" stroke-dashoffset="-54"/>
+            </svg>
+            <div style="width:100%">
+              <div class="legend-item"><span class="legend-label"><span class="legend-dot" style="background:#ef4444"></span>GST & IT</span><span><span class="legend-val">35%</span></span></div>
+              <div class="legend-item"><span class="legend-label"><span class="legend-dot" style="background:#f59e0b"></span>Inventory</span><span><span class="legend-val">28%</span></span></div>
+              <div class="legend-item"><span class="legend-label"><span class="legend-dot" style="background:#10b981"></span>Legal</span><span><span class="legend-val">22%</span></span></div>
+              <div class="legend-item"><span class="legend-label"><span class="legend-dot" style="background:#8b5cf6"></span>HR/Security</span><span><span class="legend-val">15%</span></span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:14px;">
+        <div class="table-card">
+          <div class="table-header">
+            <div><div class="table-title">Recent Audit Records</div><div class="table-subtitle">Latest across all modules</div></div>
+            <button class="btn-sm accent" onclick="showPage('records',document.querySelector('.nav-item[onclick*=records]'))">View All →</button>
+          </div>
+          <table class="data-table"><thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Status</th><th>Risk</th></tr></thead>
+          <tbody id="dash-audits-tbody"><tr><td colspan="5" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody></table>
+        </div>
+        <div class="activity-card">
+          <div style="margin-bottom:14px"><div class="chart-title">Live Activity Feed</div><div class="chart-subtitle">Recent system events</div></div>
+          <div id="dash-activity"><div style="text-align:center;color:var(--text3);font-size:11px;padding:20px">Loading...</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ANALYTICS ===== -->
+    <div id="page-analytics" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Analytics</span></div>
+        <h1>Analytics & Insights</h1>
+        <p>Deep-dive analysis of store audit performance</p>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card blue"><div class="metric-icon blue">📈</div><div class="metric-label">Avg Resolution</div><div class="metric-value">4.2d</div><div class="metric-change up">↑ 18% faster</div></div>
+        <div class="metric-card green"><div class="metric-icon green">🎯</div><div class="metric-label">Audit Accuracy</div><div class="metric-value">97.3%</div><div class="metric-change up">↑ 0.8% this month</div></div>
+        <div class="metric-card gold"><div class="metric-icon gold">💰</div><div class="metric-label">Cost Savings</div><div class="metric-value">₹2.84L</div><div class="metric-change up">↑ Early detection</div></div>
+        <div class="metric-card red"><div class="metric-icon red">⏱</div><div class="metric-label">Overdue Audits</div><div class="metric-value">3</div><div class="metric-change down">↓ Needs attention</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Department Performance</div><div class="chart-subtitle">Pass rates by department</div></div></div>
+          <svg class="chart-svg" viewBox="0 0 280 200" height="200" style="overflow:visible">
+            <defs><linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3b82f6"/><stop offset="100%" stop-color="#6366f1"/></linearGradient></defs>
+            <rect x="10" y="40" width="32" height="120" rx="3" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+            <rect x="10" y="55" width="32" height="105" rx="3" fill="url(#barGrad)"/>
+            <rect x="55" y="40" width="32" height="120" rx="3" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+            <rect x="55" y="70" width="32" height="90" rx="3" fill="url(#barGrad)"/>
+            <rect x="100" y="40" width="32" height="120" rx="3" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+            <rect x="100" y="50" width="32" height="110" rx="3" fill="url(#barGrad)"/>
+            <rect x="145" y="40" width="32" height="120" rx="3" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+            <rect x="145" y="55" width="32" height="105" rx="3" fill="url(#barGrad)"/>
+            <rect x="190" y="40" width="32" height="120" rx="3" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.25)" stroke-width="1"/>
+            <rect x="190" y="80" width="32" height="80" rx="3" fill="url(#barGrad)"/>
+            <text x="26" y="175" font-size="7.5" fill="rgba(100,116,139,0.9)" text-anchor="middle" font-family="DM Mono">Finance</text>
+            <text x="71" y="175" font-size="7.5" fill="rgba(100,116,139,0.9)" text-anchor="middle" font-family="DM Mono">Ops</text>
+            <text x="116" y="175" font-size="7.5" fill="rgba(100,116,139,0.9)" text-anchor="middle" font-family="DM Mono">IT</text>
+            <text x="161" y="175" font-size="7.5" fill="rgba(100,116,139,0.9)" text-anchor="middle" font-family="DM Mono">HR</text>
+            <text x="206" y="175" font-size="7.5" fill="rgba(100,116,139,0.9)" text-anchor="middle" font-family="DM Mono">Security</text>
+            <text x="26" y="50" font-size="9" fill="#93c5fd" text-anchor="middle" font-family="DM Mono">88%</text>
+            <text x="71" y="65" font-size="9" fill="#93c5fd" text-anchor="middle" font-family="DM Mono">75%</text>
+            <text x="116" y="45" font-size="9" fill="#93c5fd" text-anchor="middle" font-family="DM Mono">67%</text>
+            <text x="161" y="50" font-size="9" fill="#93c5fd" text-anchor="middle" font-family="DM Mono">88%</text>
+            <text x="206" y="75" font-size="9" fill="#93c5fd" text-anchor="middle" font-family="DM Mono">67%</text>
+          </svg>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Compliance Framework Scores</div><div class="chart-subtitle">Tamil Nadu regulatory requirements</div></div></div>
+          <div style="display:flex;flex-direction:column;gap:12px;margin-top:8px;">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span style="color:var(--text2)">GST (GSTR Filings)</span><span style="color:var(--text)">72%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:72%;background:linear-gradient(90deg,#f59e0b,#ef4444)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span style="color:var(--text2)">PF/ESI Labour</span><span style="color:var(--text)">100%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:100%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span style="color:var(--text2)">FSSAI Food Safety</span><span style="color:var(--text)">88%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:88%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span style="color:var(--text2)">PCI-DSS (IT/POS)</span><span style="color:var(--text)">45%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:45%;background:linear-gradient(90deg,#ef4444,#f97316)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span style="color:var(--text2)">TN Municipal/Fire</span><span style="color:var(--text)">60%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:60%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span style="color:var(--text2)">Weights & Measures</span><span style="color:var(--text)">92%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:92%;background:linear-gradient(90deg,#10b981,#14b8a6)"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;margin-bottom:4px"><span style="color:var(--text2)">Plastic Ban (TN)</span><span style="color:var(--text)">35%</span></div>
+              <div class="prog-bar"><div class="prog-fill" style="width:35%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div><div class="table-title">Category-wise Audit Summary</div><div class="chart-subtitle">Pass/Fail breakdown by category</div></div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Category</th><th>Total</th><th>Pass</th><th>Fail</th><th>Warning</th><th>Pass Rate</th><th>Trend</th></tr></thead>
+          <tbody>
+            <tr><td style="color:var(--text);font-weight:500">GST & Tax</td><td>3</td><td style="color:#34d399">2</td><td style="color:#f87171">0</td><td style="color:var(--gold2)">1</td><td><div class="risk-bar"><div class="risk-fill" style="width:67%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></td><td style="color:#34d399">↑ Improving</td></tr>
+            <tr><td style="color:var(--text);font-weight:500">Inventory</td><td>3</td><td style="color:#34d399">0</td><td style="color:#f87171">2</td><td style="color:var(--gold2)">1</td><td><div class="risk-bar"><div class="risk-fill" style="width:0%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div></td><td style="color:#f87171">↓ Critical</td></tr>
+            <tr><td style="color:var(--text);font-weight:500">IT Infrastructure</td><td>3</td><td style="color:#34d399">1</td><td style="color:#f87171">2</td><td style="color:var(--gold2)">0</td><td><div class="risk-bar"><div class="risk-fill" style="width:33%;background:linear-gradient(90deg,#ef4444,#f87171)"></div></div></td><td style="color:#f87171">↓ Needs work</td></tr>
+            <tr><td style="color:var(--text);font-weight:500">Regulatory/Legal</td><td>3</td><td style="color:#34d399">2</td><td style="color:#f87171">1</td><td style="color:var(--gold2)">0</td><td><div class="risk-bar"><div class="risk-fill" style="width:67%;background:linear-gradient(90deg,#f59e0b,#10b981)"></div></div></td><td style="color:var(--gold2)">→ Stable</td></tr>
+            <tr><td style="color:var(--text);font-weight:500">HR Compliance</td><td>2</td><td style="color:#34d399">2</td><td style="color:#f87171">0</td><td style="color:var(--gold2)">0</td><td><div class="risk-bar"><div class="risk-fill" style="width:100%;background:linear-gradient(90deg,#10b981,#34d399)"></div></div></td><td style="color:#34d399">↑ Good</td></tr>
+            <tr><td style="color:var(--text);font-weight:500">Safety & Security</td><td>1</td><td style="color:#34d399">0</td><td style="color:#f87171">0</td><td style="color:var(--gold2)">1</td><td><div class="risk-bar"><div class="risk-fill" style="width:50%;background:linear-gradient(90deg,#f59e0b,#f97316)"></div></div></td><td style="color:var(--gold2)">→ Monitor</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== GST PAGE ===== -->
+    <div id="page-gst" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>GST & Tax Audit</span></div>
+        <h1>GST & Tax Compliance</h1>
+        <p>GSTR-1, GSTR-3B, ITC Reconciliation, E-Invoice — Tamil Nadu Store</p>
+      </div>
+      <div id="gst-alert-div"></div>
+      <div class="metrics-grid" id="gst-metrics">
+        <div class="metric-card green"><div class="metric-icon green">✓</div><div class="metric-label">Filed</div><div class="metric-value" id="gst-m-filed">—</div><div class="metric-change up">On time</div></div>
+        <div class="metric-card red"><div class="metric-icon red">⚠</div><div class="metric-label">Overdue</div><div class="metric-value" id="gst-m-overdue">—</div><div class="metric-change down">Penalty risk!</div></div>
+        <div class="metric-card gold"><div class="metric-icon gold">⏳</div><div class="metric-label">Pending</div><div class="metric-value" id="gst-m-pending">—</div><div class="metric-change">Schedule filing</div></div>
+        <div class="metric-card teal"><div class="metric-icon teal">🔄</div><div class="metric-label">Under Review</div><div class="metric-value" id="gst-m-review">—</div><div class="metric-change">ITC mismatch</div></div>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card blue"><div class="metric-icon blue">₹</div><div class="metric-label">Total Tax Paid</div><div class="metric-value" id="gst-m-tax" style="font-size:20px">—</div><div class="metric-change">Filed returns</div></div>
+        <div class="metric-card teal"><div class="metric-icon teal">📥</div><div class="metric-label">ITC Claimed</div><div class="metric-value" id="gst-m-itc" style="font-size:20px">—</div><div class="metric-change">Input credit</div></div>
+        <div class="metric-card gold"><div class="metric-icon gold">📌</div><div class="metric-label">GST Number</div><div class="metric-value" style="font-size:14px;margin-top:8px">29ABCDE1234F1Z5</div><div class="metric-change">Tamil Nadu</div></div>
+        <div class="metric-card green"><div class="metric-icon green">📄</div><div class="metric-label">E-Invoice</div><div class="metric-value" style="font-size:18px">Active</div><div class="metric-change up">Turnover &gt;₹5Cr</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div><div class="table-title">GST Filing Register</div><div class="table-subtitle" id="gst-table-sub">GSTR-1, GSTR-3B, ITC reconciliation records</div></div>
+          <div class="table-header-actions">
+            <button class="btn-sm" onclick="loadGST()">⟳ Refresh</button>
+            <button class="btn-sm accent company-action" onclick="openModal('gst')">+ Add Filing</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Period</th><th>GST Number</th><th>Filing Type</th><th>Due Date</th><th>Filed Date</th><th>Status</th><th>Tax Amount (₹)</th><th>ITC Claimed (₹)</th><th>Discrepancy (₹)</th><th>Remarks</th></tr></thead>
+          <tbody id="gst-tbody"><tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== INVENTORY PAGE ===== -->
+    <div id="page-inventory" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Inventory Audit</span></div>
+        <h1>Inventory Audit</h1>
+        <p>Physical stock count, expiry checks, FIFO/FEFO compliance — FSSAI requirement</p>
+      </div>
+      <div id="inv-alert-div"></div>
+      <div class="metrics-grid" id="inv-metrics">
+        <div class="metric-card blue"><div class="metric-icon blue">📦</div><div class="metric-label">Total Items</div><div class="metric-value" id="inv-m-total">—</div><div class="metric-change">Under audit</div></div>
+        <div class="metric-card green"><div class="metric-icon green">✓</div><div class="metric-label">Match</div><div class="metric-value" id="inv-m-match">—</div><div class="metric-change up">System = Physical</div></div>
+        <div class="metric-card red"><div class="metric-icon red">↓</div><div class="metric-label">Shortage</div><div class="metric-value" id="inv-m-shortage">—</div><div class="metric-change down">Pilferage risk</div></div>
+        <div class="metric-card red"><div class="metric-icon red">⏰</div><div class="metric-label">Expired on Shelf</div><div class="metric-value" id="inv-m-expired">—</div><div class="metric-change down">Remove NOW!</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;" id="inv-filters">
+        <span class="chip active" onclick="setInvFilter('',this)">All</span>
+        <span class="chip" onclick="setInvFilter('match',this)" style="border-color:rgba(16,185,129,0.3);color:#34d399">✓ Match</span>
+        <span class="chip" onclick="setInvFilter('shortage',this)" style="border-color:rgba(239,68,68,0.3);color:#f87171">↓ Shortage</span>
+        <span class="chip" onclick="setInvFilter('expired',this)" style="border-color:rgba(239,68,68,0.4);color:#fca5a5">⏰ Expired</span>
+        <span class="chip" onclick="setInvFilter('damaged',this)" style="border-color:rgba(245,158,11,0.3);color:var(--gold2)">⚠ Damaged</span>
+        <span class="chip" onclick="setInvFilter('excess',this)" style="border-color:rgba(59,130,246,0.3);color:var(--accent2)">↑ Excess</span>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div><div class="table-title">Stock Audit Register</div><div class="table-subtitle" id="inv-table-sub">Physical count vs system records</div></div>
+          <div class="table-header-actions">
+            <button class="btn-sm" onclick="loadInventory()">⟳ Refresh</button>
+            <button class="btn-sm accent company-action" onclick="openModal('inventory')">+ Add Entry</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Item Name</th><th>Category</th><th>System Qty</th><th>Physical Qty</th><th>Diff</th><th>Unit Price</th><th>Expiry Date</th><th>Location</th><th>Status</th><th>Auditor</th><th>Notes</th></tr></thead>
+          <tbody id="inv-tbody"><tr><td colspan="11" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== IT PAGE ===== -->
+    <div id="page-it" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>IT Infrastructure</span></div>
+        <h1>IT Infrastructure Audit</h1>
+        <p>POS terminals, CCTV, servers, network, payment systems — PCI-DSS & cybersecurity</p>
+      </div>
+      <div class="metrics-grid" id="it-metrics">
+        <div class="metric-card blue"><div class="metric-icon blue">💻</div><div class="metric-label">Total Assets</div><div class="metric-value" id="it-m-total">—</div><div class="metric-change">In register</div></div>
+        <div class="metric-card green"><div class="metric-icon green">✓</div><div class="metric-label">Operational</div><div class="metric-value" id="it-m-ok">—</div><div class="metric-change up">Working fine</div></div>
+        <div class="metric-card red"><div class="metric-icon red">⚠</div><div class="metric-label">Faulty/Issues</div><div class="metric-value" id="it-m-faulty">—</div><div class="metric-change down">Needs repair</div></div>
+        <div class="metric-card gold"><div class="metric-icon gold">🔄</div><div class="metric-label">Outdated Patches</div><div class="metric-value" id="it-m-patch">—</div><div class="metric-change down">Security risk!</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div><div class="table-title">IT Asset Register</div><div class="table-subtitle">POS, CCTV, servers, network, payment terminals</div></div>
+          <div class="table-header-actions">
+            <button class="btn-sm" onclick="loadIT()">⟳ Refresh</button>
+            <button class="btn-sm accent company-action" onclick="openModal('it')">+ Add Asset</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Asset Name</th><th>Type</th><th>Serial No.</th><th>Location</th><th>Warranty</th><th>Status</th><th>Software</th><th>Antivirus</th><th>Patch</th><th>Assigned To</th><th>Notes</th></tr></thead>
+          <tbody id="it-tbody"><tr><td colspan="11" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== LICENSES PAGE ===== -->
+    <div id="page-licenses" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Licenses & Legal</span></div>
+        <h1>Licenses & Legal Registrations</h1>
+        <p>FSSAI, Trade License, Fire NOC, Weights & Measures, TNPCB, PF/ESI — Tamil Nadu requirements</p>
+      </div>
+      <div id="lic-alert-div"></div>
+      <div class="metrics-grid-5" id="lic-metrics">
+        <div class="metric-card green"><div class="metric-icon green">✓</div><div class="metric-label">Valid</div><div class="metric-value" id="lic-m-valid">—</div><div class="metric-change up">All clear</div></div>
+        <div class="metric-card red"><div class="metric-icon red">⛔</div><div class="metric-label">Expired</div><div class="metric-value" id="lic-m-expired">—</div><div class="metric-change down">Renew ASAP!</div></div>
+        <div class="metric-card gold"><div class="metric-icon gold">⏳</div><div class="metric-label">Renewal Due</div><div class="metric-value" id="lic-m-due">—</div><div class="metric-change">Act soon</div></div>
+        <div class="metric-card teal"><div class="metric-icon teal">📝</div><div class="metric-label">Applied</div><div class="metric-value" id="lic-m-applied">—</div><div class="metric-change">In process</div></div>
+        <div class="metric-card red"><div class="metric-icon red">🚫</div><div class="metric-label">Suspended</div><div class="metric-value" id="lic-m-susp">—</div><div class="metric-change down">Critical!</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div><div class="table-title">License Register</div><div class="table-subtitle">All permits, registrations, and renewals</div></div>
+          <div class="table-header-actions">
+            <button class="btn-sm" onclick="loadLicenses()">⟳ Refresh</button>
+            <button class="btn-sm accent company-action" onclick="openModal('license')">+ Add License</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>License Name</th><th>Type</th><th>Authority</th><th>License Number</th><th>Issue Date</th><th>Expiry Date</th><th>Days Left</th><th>Status</th><th>Notes</th></tr></thead>
+          <tbody id="lic-tbody"><tr><td colspan="9" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== HR PAGE ===== -->
+    <div id="page-hr" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>HR & Payroll</span></div>
+        <h1>HR & Labour Compliance</h1>
+        <p>PF/ESI registration, minimum wages (TN), attendance, training — EPFO & ESIC compliance</p>
+      </div>
+      <div id="hr-locked" class="access-notice" style="display:none">🔒 This section requires <strong>Store Admin</strong> access.</div>
+      <div id="hr-content">
+        <div class="metrics-grid" id="hr-metrics">
+          <div class="metric-card blue"><div class="metric-icon blue">👥</div><div class="metric-label">Total Employees</div><div class="metric-value" id="hr-m-total">—</div><div class="metric-change">Under audit</div></div>
+          <div class="metric-card red"><div class="metric-icon red">📉</div><div class="metric-label">PF Issues</div><div class="metric-value" id="hr-m-pf">—</div><div class="metric-change down">EPFO gap</div></div>
+          <div class="metric-card red"><div class="metric-icon red">🏥</div><div class="metric-label">ESI Issues</div><div class="metric-value" id="hr-m-esi">—</div><div class="metric-change down">ESIC gap</div></div>
+          <div class="metric-card gold"><div class="metric-icon gold">📚</div><div class="metric-label">Training Pending</div><div class="metric-value" id="hr-m-train">—</div><div class="metric-change">Schedule soon</div></div>
+        </div>
+        <div class="table-card">
+          <div class="table-header">
+            <div><div class="table-title">Employee Compliance Register</div><div class="table-subtitle">PF, ESI, Wages, Training — Tamil Nadu Labour Act</div></div>
+            <div class="table-header-actions">
+              <button class="btn-sm" onclick="loadHR()">⟳ Refresh</button>
+              <button class="btn-sm accent company-action" onclick="openModal('hr')">+ Add Employee</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>Emp ID</th><th>Name</th><th>Designation</th><th>Dept</th><th>PF Status</th><th>ESI Status</th><th>Min Wage</th><th>Training</th><th>Attendance %</th><th>Remarks</th></tr></thead>
+            <tbody id="hr-tbody"><tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== COMPLIANCE PAGE ===== -->
+    <div id="page-compliance" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Compliance</span></div>
+        <h1>Regulatory Compliance</h1>
+        <p>All frameworks — GST, FSSAI, TN Labour, Legal Metrology, Fire NOC, TNPCB, PCI-DSS</p>
+      </div>
+      <div class="metrics-grid-5">
+        <div class="metric-card green"><div class="metric-icon green">📊</div><div class="metric-label">GST Filing</div><div class="metric-value">96%</div><div class="metric-change up">↑ On track</div></div>
+        <div class="metric-card green"><div class="metric-icon green">🥗</div><div class="metric-label">FSSAI</div><div class="metric-value">88%</div><div class="metric-change">Renewal due</div></div>
+        <div class="metric-card blue"><div class="metric-icon blue">👷</div><div class="metric-label">Labour Law</div><div class="metric-value">94%</div><div class="metric-change up">↑ Compliant</div></div>
+        <div class="metric-card red"><div class="metric-icon red">💳</div><div class="metric-label">PCI-DSS</div><div class="metric-value">55%</div><div class="metric-change down">↓ POS risk</div></div>
+        <div class="metric-card red"><div class="metric-icon red">🏛</div><div class="metric-label">Municipal</div><div class="metric-value">40%</div><div class="metric-change down">↓ License expired!</div></div>
+      </div>
+      <div class="table-card">
+        <div class="table-header">
+          <div><div class="table-title">Compliance Checklist</div><div class="table-subtitle">All Tamil Nadu regulatory requirements</div></div>
+          <div class="table-header-actions">
+            <button class="btn-sm" onclick="loadCompliance()">⟳ Refresh</button>
+            <button class="btn-sm accent company-action" onclick="openModal('compliance')">+ Add Requirement</button>
+          </div>
+        </div>
+        <table class="data-table">
+          <thead><tr><th>Requirement</th><th>Framework</th><th>Owner</th><th>Authority</th><th>Due Date</th><th>Status</th><th>Score</th></tr></thead>
+          <tbody id="comp-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ===== REPORTS PAGE ===== -->
+    <div id="page-reports" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Reports</span></div>
+        <h1>Reports Library</h1>
+        <p>Download and access all store audit reports</p>
+      </div>
+      <div class="reports-grid" id="reports-grid">
+        <div style="grid-column:1/-1;text-align:center;color:var(--text3);padding:40px">Loading reports...</div>
+      </div>
+    </div>
+
+    <!-- ===== AUDIT RECORDS ===== -->
+    <div id="page-records" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Audit Records</span></div>
+        <h1>Audit Records</h1>
+        <p>Complete audit trail — all modules, categories and departments</p>
+      </div>
+      <div id="records-locked" class="access-notice" style="display:none">🔒 This section requires <strong>Store Admin</strong> access.</div>
+      <div id="records-content">
+        <div class="table-card">
+          <div class="table-header">
+            <div><div class="table-title">All Audit Records</div><div class="table-subtitle" id="rec-count">Loading...</div></div>
+            <div class="table-header-actions">
+              <select class="btn-sm" id="rec-filter-status" onchange="loadRecords()">
+                <option value="">All Status</option>
+                <option value="pass">Pass</option><option value="fail">Fail</option>
+                <option value="warning">Warning</option><option value="review">Review</option>
+              </select>
+              <select class="btn-sm" id="rec-filter-cat" onchange="loadRecords()">
+                <option value="">All Categories</option>
+                <option value="Financial">Financial</option>
+                <option value="GST Compliance">GST Compliance</option>
+                <option value="Inventory">Inventory</option>
+                <option value="IT Infrastructure">IT Infrastructure</option>
+                <option value="HR Compliance">HR Compliance</option>
+                <option value="Regulatory">Regulatory</option>
+                <option value="Security">Security</option>
+                <option value="Safety">Safety</option>
+              </select>
+              <button class="btn-sm" onclick="loadRecords()">⟳ Refresh</button>
+              <button class="btn-sm accent company-action" onclick="openModal('audit')">+ New Audit</button>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>ID</th><th>Title</th><th>Category</th><th>Auditor</th><th>Dept</th><th>Date</th><th>Status</th><th>Priority</th><th>Risk</th><th class="company-action">Actions</th></tr></thead>
+            <tbody id="rec-tbody"><tr><td colspan="10" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== USERS PAGE ===== -->
+    <div id="page-users" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Users</span></div>
+        <h1>User Management</h1>
+        <p>Manage auditors and store admin accounts</p>
+      </div>
+      <div id="users-locked" class="access-notice" style="display:none">🔒 Admin access required.</div>
+      <div id="users-content">
+        <div class="table-card">
+          <div class="table-header">
+            <div><div class="table-title">All Users</div><div class="table-subtitle" id="users-sub">Loading...</div></div>
+            <button class="btn-sm accent">+ Invite User</button>
+          </div>
+          <table class="data-table">
+            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Company/Store</th><th>Last Login</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="users-tbody"><tr><td colspan="7" style="text-align:center;color:var(--text3);padding:20px">Loading...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== SETTINGS PAGE ===== -->
+    <div id="page-settings" class="page">
+      <div class="page-header">
+        <div class="breadcrumb"><span>AuditPro</span> › <span>Settings</span></div>
+        <h1>Settings</h1>
+        <p>Configure your account and store audit preferences</p>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-nav">
+          <div class="settings-nav-item active" onclick="switchSettingsTab(this)">👤 Profile</div>
+          <div class="settings-nav-item" onclick="switchSettingsTab(this)">🔔 Notifications</div>
+          <div class="settings-nav-item" onclick="switchSettingsTab(this)">🔐 Security</div>
+          <div class="settings-nav-item company-action" onclick="switchSettingsTab(this)">🏬 Store Info</div>
+          <div class="settings-nav-item" onclick="switchSettingsTab(this)">🎨 Appearance</div>
+        </div>
+        <div class="settings-panel">
+          <div class="settings-section">
+            <h3>Profile Information</h3>
+            <p>Update your details shown on audit reports</p>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">First Name</label><input class="form-input" id="set-fname" placeholder="Ravi"></div>
+              <div class="form-group"><label class="form-label">Last Name</label><input class="form-input" id="set-lname" placeholder="Kumar"></div>
+            </div>
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" id="set-email" type="email"></div>
+            <div class="form-group company-action" id="set-store-field" style="display:none"><label class="form-label">Store Name</label><input class="form-input" id="set-store" placeholder="Saravana Stores"></div>
+            <button class="btn-sm accent" style="padding:9px 20px" onclick="saveProfile()">Save Changes</button>
+          </div>
+          <div class="settings-section">
+            <h3>Alert Notifications</h3>
+            <p>Configure automatic alerts for your store audit</p>
+            <div class="toggle-row"><div><div class="toggle-label">License Expiry Alerts</div><div class="toggle-sub">30 days before expiry</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><div><div class="toggle-label">GST Filing Reminders</div><div class="toggle-sub">7 days before due date</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><div><div class="toggle-label">Expired Product Alerts</div><div class="toggle-sub">FSSAI — expired stock on shelf</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><div><div class="toggle-label">HR Compliance Reminders</div><div class="toggle-sub">PF/ESI due dates</div></div><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><div><div class="toggle-label">Weekly Audit Digest</div><div class="toggle-sub">Summary email every Monday</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle-row"><div><div class="toggle-label">Fire Safety Alerts</div><div class="toggle-sub">Extinguisher expiry &amp; NOC status</div></div><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<!-- ===== MODALS ===== -->
+
+<!-- Audit Modal -->
+<div class="modal-overlay" id="modal-audit">
+  <div class="modal">
+    <div class="modal-title">New Audit Record</div>
+    <div class="modal-sub">Add a new store audit entry across any category</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Title</label><input class="form-input" id="ma-title" placeholder="e.g. GST Filing Verification"></div>
+      <div class="form-group"><label class="form-label">Department</label><input class="form-input" id="ma-dept" placeholder="e.g. Finance"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Category</label>
+        <select class="form-input" id="ma-cat">
+          <option>Financial</option><option>GST Compliance</option><option>Inventory</option>
+          <option>IT Infrastructure</option><option>HR Compliance</option><option>Regulatory</option>
+          <option>Security</option><option>Safety</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Priority</label>
+        <select class="form-input" id="ma-pri"><option value="high">High</option><option value="medium">Medium</option><option value="low">Low</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="ma-status"><option value="review">Review</option><option value="pass">Pass</option><option value="fail">Fail</option><option value="warning">Warning</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Risk Score (0–100)</label><input class="form-input" id="ma-risk" type="number" min="0" max="100" placeholder="50"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes / Findings</label><textarea class="form-input" id="ma-notes" rows="3" placeholder="Audit findings, recommendations..."></textarea></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal('audit')">Cancel</button>
+      <button class="modal-save-btn" onclick="saveAudit()">Save Audit</button>
+    </div>
+  </div>
+</div>
+
+<!-- GST Modal -->
+<div class="modal-overlay" id="modal-gst">
+  <div class="modal">
+    <div class="modal-title">Add GST Filing Record</div>
+    <div class="modal-sub">Record GSTR-1, GSTR-3B or ITC reconciliation entry</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Period (YYYY-MM)</label><input class="form-input" id="mg-period" placeholder="2025-04"></div>
+      <div class="form-group"><label class="form-label">GST Number</label><input class="form-input" id="mg-gstin" placeholder="29ABCDE1234F1Z5"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Filing Type</label>
+        <select class="form-input" id="mg-type"><option>GSTR-1</option><option>GSTR-3B</option><option>GSTR-9</option><option>ITC Reconciliation</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="mg-status"><option value="filed">Filed</option><option value="pending">Pending</option><option value="overdue">Overdue</option><option value="under_review">Under Review</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="mg-due" type="date"></div>
+      <div class="form-group"><label class="form-label">Filed Date</label><input class="form-input" id="mg-filed" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Tax Amount (₹)</label><input class="form-input" id="mg-tax" type="number" placeholder="125430.50"></div>
+      <div class="form-group"><label class="form-label">ITC Claimed (₹)</label><input class="form-input" id="mg-itc" type="number" placeholder="18200.00"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Remarks</label><textarea class="form-input" id="mg-remarks" rows="2" placeholder="ITC mismatch notes, penalty details..."></textarea></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal('gst')">Cancel</button>
+      <button class="modal-save-btn" onclick="saveGST()">Save Filing</button>
+    </div>
+  </div>
+</div>
+
+<!-- Inventory Modal -->
+<div class="modal-overlay" id="modal-inventory">
+  <div class="modal">
+    <div class="modal-title">Inventory Audit Entry</div>
+    <div class="modal-sub">Add physical stock verification record</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Item Name</label><input class="form-input" id="mi-name" placeholder="e.g. Basmati Rice 5kg"></div>
+      <div class="form-group"><label class="form-label">Category</label><input class="form-input" id="mi-cat" placeholder="e.g. Food Grains"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">System Qty</label><input class="form-input" id="mi-sys" type="number" placeholder="500"></div>
+      <div class="form-group"><label class="form-label">Physical Qty</label><input class="form-input" id="mi-phy" type="number" placeholder="487"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Unit Price (₹)</label><input class="form-input" id="mi-price" type="number" placeholder="285.00"></div>
+      <div class="form-group"><label class="form-label">Location / Aisle</label><input class="form-input" id="mi-loc" placeholder="Aisle 1"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Expiry Date</label><input class="form-input" id="mi-exp" type="date"></div>
+      <div class="form-group"><label class="form-label">Status Override</label>
+        <select class="form-input" id="mi-status">
+          <option value="">Auto-detect</option><option value="expired">Expired</option>
+          <option value="damaged">Damaged</option><option value="shortage">Shortage</option>
+          <option value="excess">Excess</option><option value="match">Match</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="mi-notes" rows="2" placeholder="Observations..."></textarea></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal('inventory')">Cancel</button>
+      <button class="modal-save-btn" onclick="saveInventory()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- IT Asset Modal -->
+<div class="modal-overlay" id="modal-it">
+  <div class="modal">
+    <div class="modal-title">Add IT Asset</div>
+    <div class="modal-sub">Register POS terminals, CCTV, servers, payment devices</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Asset Name</label><input class="form-input" id="it-name" placeholder="e.g. POS Terminal 1"></div>
+      <div class="form-group"><label class="form-label">Asset Type</label>
+        <select class="form-input" id="it-type">
+          <option>POS System</option><option>Server</option><option>Desktop</option><option>Security/CCTV</option>
+          <option>Network/Router</option><option>Scanner</option><option>Payment Terminal</option>
+          <option>Printer</option><option>Storage/Backup</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Serial Number</label><input class="form-input" id="it-serial" placeholder="SN-12345"></div>
+      <div class="form-group"><label class="form-label">Location</label><input class="form-input" id="it-loc" placeholder="Billing Counter 1"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="it-status">
+          <option value="operational">Operational</option><option value="faulty">Faulty</option>
+          <option value="maintenance">Maintenance</option><option value="under_review">Under Review</option><option value="disposed">Disposed</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Assigned To</label><input class="form-input" id="it-user" placeholder="Cashier 1"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Antivirus Status</label>
+        <select class="form-input" id="it-av"><option value="active">Active</option><option value="inactive">Inactive</option><option value="expired">Expired</option><option value="N/A">N/A</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Patch Status</label>
+        <select class="form-input" id="it-patch"><option value="updated">Updated</option><option value="outdated">Outdated</option><option value="N/A">N/A</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes / Issues</label><textarea class="form-input" id="it-notes" rows="2" placeholder="Issues, warranty details..."></textarea></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal('it')">Cancel</button>
+      <button class="modal-save-btn" onclick="saveIT()">Save Asset</button>
+    </div>
+  </div>
+</div>
+
+<!-- License Modal -->
+<div class="modal-overlay" id="modal-license">
+  <div class="modal">
+    <div class="modal-title">Add License / Registration</div>
+    <div class="modal-sub">Track store licenses, permits and registrations</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">License Name</label><input class="form-input" id="ll-name" placeholder="e.g. FSSAI License"></div>
+      <div class="form-group"><label class="form-label">Type</label>
+        <select class="form-input" id="ll-type">
+          <option>Food Safety</option><option>Tax</option><option>Municipal</option>
+          <option>Labour</option><option>Safety</option><option>Regulatory</option><option>Environment</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Authority</label><input class="form-input" id="ll-auth" placeholder="e.g. FSSAI Authority"></div>
+      <div class="form-group"><label class="form-label">License Number</label><input class="form-input" id="ll-num" placeholder="TN-12345678"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Issue Date</label><input class="form-input" id="ll-issue" type="date"></div>
+      <div class="form-group"><label class="form-label">Expiry Date</label><input class="form-input" id="ll-exp" type="date"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="ll-status">
+          <option value="valid">Valid</option><option value="expired">Expired</option>
+          <option value="renewal_due">Renewal Due</option><option value="applied">Applied</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Renewal Reminder (days)</label><input class="form-input" id="ll-remind" type="number" placeholder="30"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-input" id="ll-notes" rows="2" placeholder="Renewal contacts, requirements..."></textarea></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal('license')">Cancel</button>
+      <button class="modal-save-btn" onclick="saveLicense()">Save License</button>
+    </div>
+  </div>
+</div>
+
+<!-- HR Modal -->
+<div class="modal-overlay" id="modal-hr">
+  <div class="modal">
+    <div class="modal-title">Add Employee Compliance Record</div>
+    <div class="modal-sub">Track PF, ESI, minimum wages and training status</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Employee ID</label><input class="form-input" id="hr-id" placeholder="EMP001"></div>
+      <div class="form-group"><label class="form-label">Full Name</label><input class="form-input" id="hr-name" placeholder="Murugan S."></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Designation</label><input class="form-input" id="hr-des" placeholder="Store Manager"></div>
+      <div class="form-group"><label class="form-label">Department</label><input class="form-input" id="hr-dept" placeholder="Management"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Joining Date</label><input class="form-input" id="hr-join" type="date"></div>
+      <div class="form-group"><label class="form-label">Attendance %</label><input class="form-input" id="hr-att" type="number" placeholder="95" min="0" max="100"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">PF Status</label>
+        <select class="form-input" id="hr-pf"><option value="active">Active</option><option value="inactive">Inactive</option><option value="pending">Pending</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">ESI Status</label>
+        <select class="form-input" id="hr-esi"><option value="active">Active</option><option value="inactive">Inactive</option><option value="pending">Pending</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Min Wage Status</label>
+        <select class="form-input" id="hr-wage"><option value="compliant">Compliant</option><option value="non_compliant">Non-Compliant</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Training Status</label>
+        <select class="form-input" id="hr-train"><option value="complete">Complete</option><option value="pending">Pending</option></select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Remarks</label><textarea class="form-input" id="hr-rem" rows="2" placeholder="Any compliance notes..."></textarea></div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal('hr')">Cancel</button>
+      <button class="modal-save-btn" onclick="saveHR()">Save Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Compliance Modal -->
+<div class="modal-overlay" id="modal-compliance">
+  <div class="modal">
+    <div class="modal-title">Add Compliance Requirement</div>
+    <div class="modal-sub">Track a regulatory compliance item</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Requirement</label><input class="form-input" id="co-req" placeholder="e.g. GST Registration & Filing"></div>
+      <div class="form-group"><label class="form-label">Framework</label>
+        <select class="form-input" id="co-fw">
+          <option>GST</option><option>FSSAI</option><option>TN Labour</option><option>Legal Metrology</option>
+          <option>Fire Safety</option><option>PCI-DSS</option><option>Municipal</option><option>TNPCB</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Owner (Dept)</label><input class="form-input" id="co-owner" placeholder="Finance"></div>
+      <div class="form-group"><label class="form-label">Authority</label><input class="form-input" id="co-auth" placeholder="GST Portal"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" id="co-due" type="date"></div>
+      <div class="form-group"><label class="form-label">Status</label>
+        <select class="form-input" id="co-status">
+          <option value="review">Review</option><option value="pass">Pass</option>
+          <option value="fail">Fail</option><option value="warning">Warning</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="modal-close-btn" onclick="closeModal('compliance')">Cancel</button>
+      <button class="modal-save-btn" onclick="saveCompliance()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHATBOT ===== -->
+<div id="chatbot">
+  <div class="chat-window" id="chat-window">
+    <div class="chat-head">
+      <div class="chat-bot-avatar">🤖</div>
+      <div class="chat-bot-info">
+        <div class="chat-bot-name">AuditBot — Store AI</div>
+        <div class="chat-bot-status">Online — Live DB Connected</div>
+      </div>
+      <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-suggestions" id="chat-suggestions">
+      <div class="suggest-chip" onclick="sendSuggestion(this)">📊 Store summary</div>
+      <div class="suggest-chip" onclick="sendSuggestion(this)">🧾 GST status</div>
+      <div class="suggest-chip" onclick="sendSuggestion(this)">📦 Inventory issues</div>
+      <div class="suggest-chip" onclick="sendSuggestion(this)">📋 License renewals</div>
+      <div class="suggest-chip" onclick="sendSuggestion(this)">💻 IT status</div>
+    </div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chat-input" placeholder="Ask about GST, inventory, licenses..." rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+      <button class="chat-send" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+  <button class="chat-toggle" onclick="toggleChat()">🤖<span class="chat-notif">3</span></button>
+</div>
+
+<!-- ===== JAVASCRIPT ===== -->
+<script>
+const API_BASE = 'http://localhost:5000/api';
+let currentUser = null;
+let authToken   = null;
+let loginRole   = 'user';
+let regRole     = 'user';
+let invFilterStatus = '';
+
+// ── API Helper ──────────────────────────────────────────────
+async function apiCall(path, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if (authToken) opts.headers['Authorization'] = `Bearer ${authToken}`;
+  if (body)      opts.body = JSON.stringify(body);
+  try {
+    const res  = await fetch(API_BASE + path, opts);
+    const data = await res.json();
+    return { ok: res.ok, status: res.status, data };
+  } catch(e) {
+    return { ok: false, status: 0, data: { error: 'Network error' } };
+  }
+}
+
+function saveSession(token, user) {
+  authToken = token; currentUser = user;
+  localStorage.setItem('ap_token', token);
+  localStorage.setItem('ap_user', JSON.stringify(user));
+}
+function clearSession() {
+  authToken = null; currentUser = null;
+  localStorage.removeItem('ap_token');
+  localStorage.removeItem('ap_user');
+}
+
+// ── Error display ────────────────────────────────────────────
+function showErr(id, msg, isSuccess=false) {
+  const el = document.getElementById(id);
+  el.textContent = msg; el.style.display = 'block';
+  if (isSuccess) {
+    el.style.background = 'rgba(16,185,129,0.1)';
+    el.style.borderColor = 'rgba(16,185,129,0.3)';
+    el.style.color = '#34d399';
+  } else {
+    el.style.background = 'rgba(239,68,68,0.1)';
+    el.style.borderColor = 'rgba(239,68,68,0.3)';
+    el.style.color = '#fca5a5';
+  }
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+// ── AUTH ─────────────────────────────────────────────────────
+function switchAuthTab(tab) {
+  document.querySelectorAll('.auth-tab').forEach((el,i) =>
+    el.classList.toggle('active', (i===0 && tab==='login') || (i===1 && tab==='register'))
+  );
+  document.getElementById('login-panel').classList.toggle('active', tab==='login');
+  document.getElementById('register-panel').classList.toggle('active', tab==='register');
+}
+function selectLoginRole(role) {
+  loginRole = role;
+  document.getElementById('login-user-btn').classList.toggle('selected', role==='user');
+  document.getElementById('login-company-btn').classList.toggle('selected', role==='company');
+}
+function selectRegRole(role) {
+  regRole = role;
+  document.getElementById('reg-user-btn').classList.toggle('selected', role==='user');
+  document.getElementById('reg-company-btn').classList.toggle('selected', role==='company');
+  document.getElementById('reg-company-field').style.display = role==='company' ? 'block' : 'none';
+}
+function fillDemo(role) {
+  selectLoginRole(role);
+  document.getElementById('login-email').value    = role==='user' ? 'user@demo.com' : 'company@demo.com';
+  document.getElementById('login-password').value = 'demo1234';
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw    = document.getElementById('login-password').value;
+  if (!email || !pw) { showErr('login-error','Please enter email and password'); return; }
+  const btn = document.querySelector('#login-panel .btn-primary');
+  btn.textContent = 'Signing in…'; btn.disabled = true;
+  try {
+    const { ok, data } = await apiCall('/auth/login','POST',{ email, password: pw, role: loginRole });
+    if (!ok) { showErr('login-error', data.error || 'Login failed'); return; }
+    saveSession(data.token, data.user);
+    launchApp();
+  } finally { btn.textContent = 'Sign In →'; btn.disabled = false; }
+}
+
+async function handleRegister() {
+  const fname = document.getElementById('reg-fname').value.trim();
+  const lname = document.getElementById('reg-lname').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pw    = document.getElementById('reg-password').value;
+  const co    = document.getElementById('reg-company').value.trim();
+  if (!fname || !lname || !email || !pw) { showErr('reg-error','All fields required'); return; }
+  if (pw.length < 8) { showErr('reg-error','Password must be at least 8 characters'); return; }
+  const btn = document.querySelector('#register-panel .btn-primary');
+  btn.textContent = 'Creating…'; btn.disabled = true;
+  try {
+    const { ok, data } = await apiCall('/auth/register','POST',{ fname, lname, email, password: pw, role: regRole, company: co });
+    if (!ok) { showErr('reg-error', data.error || 'Registration failed'); return; }
+    showErr('reg-error', `✅ Account created for ${fname}! Redirecting to login…`, true);
+    setTimeout(() => {
+      selectLoginRole(regRole);
+      document.getElementById('login-email').value    = email;
+      document.getElementById('login-password').value = pw;
+      switchAuthTab('login');
+    }, 1800);
+  } finally { btn.textContent = 'Create Account →'; btn.disabled = false; }
+}
+
+async function tryRestoreSession() {
+  const t = localStorage.getItem('ap_token');
+  const u = localStorage.getItem('ap_user');
+  if (!t || !u) return;
+  authToken = t;
+  const { ok, data } = await apiCall('/auth/me');
+  if (ok) { currentUser = data; launchApp(); } else { clearSession(); }
+}
+document.addEventListener('DOMContentLoaded', tryRestoreSession);
+
+function launchApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display         = 'block';
+  const initials = currentUser.fname[0].toUpperCase() + currentUser.lname[0].toUpperCase();
+  document.getElementById('user-avatar-text').textContent = initials;
+  document.getElementById('sidebar-username').textContent = currentUser.fname + ' ' + currentUser.lname;
+  document.getElementById('sidebar-role').textContent     = currentUser.role === 'company' ? 'Store Admin' : 'Auditor';
+  document.getElementById('sidebar-role').className       = 'user-role' + (currentUser.role !== 'company' ? ' viewer' : '');
+  if (currentUser.company) {
+    document.getElementById('sidebar-store-name').textContent = '🏬 ' + currentUser.company;
+  }
+  // Settings prefill
+  document.getElementById('set-fname').value = currentUser.fname;
+  document.getElementById('set-lname').value = currentUser.lname;
+  document.getElementById('set-email').value = currentUser.email;
+  if (currentUser.role === 'company') {
+    document.getElementById('set-store-field').style.display = 'block';
+    document.getElementById('set-store').value = currentUser.company || '';
+  }
+  applyRoleRestrictions();
+  loadDashboard();
+  initChat();
+}
+
+function applyRoleRestrictions() {
+  const isAdmin = currentUser.role === 'company';
+  document.getElementById('user-notice').style.display = isAdmin ? 'none' : 'flex';
+  document.querySelectorAll('.company-nav').forEach(el => {
+    el.style.opacity        = isAdmin ? '1' : '0.4';
+    el.style.pointerEvents  = isAdmin ? 'all' : 'none';
+  });
+  document.querySelectorAll('.company-action').forEach(el => {
+    el.style.display = isAdmin ? '' : 'none';
+  });
+  ['hr-locked','hr-content','records-locked','records-content','users-locked','users-content'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (id.includes('locked'))  el.style.display = isAdmin ? 'none' : 'flex';
+    if (id.includes('content')) el.style.display = isAdmin ? 'block' : 'none';
+  });
+}
+
+async function handleLogout() {
+  try { await apiCall('/auth/logout','POST'); } catch {}
+  clearSession();
+  document.getElementById('app').style.display          = 'none';
+  document.getElementById('auth-screen').style.display  = 'flex';
+  document.getElementById('chat-window').classList.remove('open');
+  document.getElementById('login-email').value    = '';
+  document.getElementById('login-password').value = '';
+}
+
+// ── NAVIGATION ───────────────────────────────────────────────
+const PAGE_TITLES = {
+  dashboard:'Dashboard', analytics:'Analytics', gst:'GST & Tax Audit',
+  inventory:'Inventory Audit', it:'IT Infrastructure', licenses:'Licenses & Legal',
+  hr:'HR & Payroll', compliance:'Compliance', reports:'Reports',
+  records:'Audit Records', users:'User Management', settings:'Settings'
+};
+const PAGE_LOADERS = {
+  dashboard: loadDashboard, gst: loadGST, inventory: loadInventory,
+  it: loadIT, licenses: loadLicenses, hr: loadHR,
+  compliance: loadCompliance, reports: loadReports,
+  records: loadRecords, users: loadUsers
+};
+
+function showPage(page, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const pg = document.getElementById('page-' + page);
+  if (pg) pg.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
+  if (PAGE_LOADERS[page]) PAGE_LOADERS[page]();
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────
+async function loadDashboard() {
+  const { ok, data } = await apiCall('/dashboard/metrics');
+  if (!ok) return;
+  document.getElementById('m-total').textContent      = data.total_audits;
+  document.getElementById('m-passed').textContent     = data.passed;
+  document.getElementById('m-passrate').textContent   = `↑ ${data.pass_rate}% pass rate`;
+  document.getElementById('m-critical').textContent   = data.critical_issues;
+  document.getElementById('m-compliance').textContent = data.compliance_score + '%';
+  document.getElementById('m-gst').textContent        = data.gst_overdue + data.gst_pending;
+  document.getElementById('m-inv').textContent        = data.inventory_issues;
+  document.getElementById('m-it').textContent         = data.it_assets_issues;
+  document.getElementById('m-lic').textContent        = data.licenses_expired + data.licenses_due;
+
+  // Update nav badges
+  const gb = document.getElementById('gst-badge');
+  if (gb) { gb.textContent = data.gst_overdue || ''; gb.style.display = data.gst_overdue ? '' : 'none'; }
+  const ib = document.getElementById('inv-badge');
+  if (ib) { ib.textContent = data.inventory_issues || ''; }
+  const itb = document.getElementById('it-badge');
+  if (itb) { itb.textContent = data.it_assets_issues || ''; }
+  const lb = document.getElementById('lic-badge');
+  if (lb) { lb.textContent = data.licenses_expired || ''; }
+
+  // Critical alerts
+  const alertDiv = document.getElementById('dashboard-alerts');
+  let alertsHTML = '';
+  if (data.expired_items > 0)
+    alertsHTML += `<div class="alert-banner">🚨 <strong>${data.expired_items} expired product(s)</strong> found on shelves — FSSAI violation risk! Remove immediately.</div>`;
+  if (data.licenses_expired > 0)
+    alertsHTML += `<div class="alert-banner">⛔ <strong>${data.licenses_expired} license(s) have EXPIRED</strong> — Legal action risk. Renew urgently.</div>`;
+  if (data.gst_overdue > 0)
+    alertsHTML += `<div class="alert-banner">⚠️ <strong>${data.gst_overdue} GST filing(s) overdue</strong> — Late fee penalty applicable.</div>`;
+  alertDiv.innerHTML = alertsHTML;
+
+  loadDashboardTable();
+  loadActivityFeed();
+}
+
+async function loadDashboardTable() {
+  const { ok, data } = await apiCall('/audits?per_page=6');
+  if (!ok) return;
+  const tbody = document.getElementById('dash-audits-tbody');
+  tbody.innerHTML = data.audits.map(a => `
+    <tr>
+      <td style="color:var(--accent2);font-weight:500;font-family:'DM Mono'">${a.id}</td>
+      <td style="color:var(--text)">${a.title}</td>
+      <td><span style="font-size:10px;color:var(--text3);background:var(--bg3);padding:2px 7px;border-radius:4px">${a.category||'General'}</span></td>
+      <td><span class="status-badge ${a.status}">${a.status}</span></td>
+      <td><div class="risk-bar"><div class="risk-fill" style="width:${a.risk_score}%;background:${riskColor(a.risk_score)}"></div></div></td>
+    </tr>`).join('');
+}
+
+async function loadActivityFeed() {
+  const { ok, data } = await apiCall('/dashboard/activity');
+  if (!ok) return;
+  const el = document.getElementById('dash-activity');
+  el.innerHTML = data.map(a => `
+    <div class="activity-item">
+      <div class="activity-dot ${a.color||'blue'}"></div>
+      <div>
+        <div class="activity-title">${a.message}</div>
+        <div class="activity-meta">${a.meta} — ${fmtAgo(a.created_at)}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── GST ──────────────────────────────────────────────────────
+async function loadGST() {
+  const { ok, data } = await apiCall('/gst');
+  if (!ok) return;
+  const s = data.summary;
+  document.getElementById('gst-m-filed').textContent   = s.filed;
+  document.getElementById('gst-m-overdue').textContent = s.overdue;
+  document.getElementById('gst-m-pending').textContent = s.pending;
+  document.getElementById('gst-m-review').textContent  = s.under_review;
+  document.getElementById('gst-m-tax').textContent     = '₹' + fmtINR(s.total_tax);
+  document.getElementById('gst-m-itc').textContent     = '₹' + fmtINR(s.total_itc);
+
+  const alertDiv = document.getElementById('gst-alert-div');
+  alertDiv.innerHTML = s.overdue > 0
+    ? `<div class="alert-banner">⚠️ <strong>${s.overdue} filing(s) are OVERDUE</strong> — Late fee under Section 47 of CGST Act is applicable. File immediately!</div>` : '';
+
+  const tbody = document.getElementById('gst-tbody');
+  tbody.innerHTML = data.filings.map(g => {
+    const disc = Number(g.discrepancy);
+    return `
+    <tr>
+      <td style="font-family:'DM Mono';font-weight:500">${g.period}</td>
+      <td style="font-family:'DM Mono';font-size:10px;color:var(--text3)">${g.gst_number}</td>
+      <td><span style="color:var(--accent2)">${g.filing_type}</span></td>
+      <td style="font-family:'DM Mono';font-size:10px">${g.due_date}</td>
+      <td style="font-family:'DM Mono';font-size:10px;color:${g.filed_date?'#34d399':'var(--text3)'}">${g.filed_date||'—'}</td>
+      <td><span class="status-badge ${g.status}">${g.status.replace('_',' ')}</span></td>
+      <td style="font-family:'DM Mono'">₹${fmtINR(g.tax_amount)}</td>
+      <td style="font-family:'DM Mono'">₹${fmtINR(g.itc_claimed)}</td>
+      <td style="font-family:'DM Mono';color:${disc>0?'#f87171':disc<0?'#34d399':'var(--text3)'}">₹${fmtINR(disc)}</td>
+      <td style="font-size:10px;color:var(--text3);max-width:140px">${g.remarks||'—'}</td>
+    </tr>`; }).join('');
+}
+
+// ── INVENTORY ────────────────────────────────────────────────
+let invFilter = '';
+function setInvFilter(f, el) {
+  invFilter = f;
+  document.querySelectorAll('#inv-filters .chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  loadInventory();
+}
+
+async function loadInventory() {
+  const { ok, data } = await apiCall('/inventory?status=' + encodeURIComponent(invFilter));
+  if (!ok) return;
+  const s = data.summary;
+  document.getElementById('inv-m-total').textContent   = s.total;
+  document.getElementById('inv-m-match').textContent   = s.match;
+  document.getElementById('inv-m-shortage').textContent= s.shortage;
+  document.getElementById('inv-m-expired').textContent = s.expired;
+
+  const alertDiv = document.getElementById('inv-alert-div');
+  let html = '';
+  if (s.expired > 0)
+    html += `<div class="alert-banner">🚨 <strong>${s.expired} EXPIRED item(s)</strong> found on shelves — Immediate removal required (FSSAI violation).</div>`;
+  if (s.shortage > 0)
+    html += `<div class="alert-banner" style="background:rgba(245,158,11,0.08);border-color:rgba(245,158,11,0.2);color:var(--gold2)">⚠️ <strong>${s.shortage} item(s) show shortage</strong> — Possible pilferage or stock discrepancy.</div>`;
+  alertDiv.innerHTML = html;
+
+  document.getElementById('inv-table-sub').textContent = `${s.total} items | ${s.match} match, ${s.shortage} shortage, ${s.expired} expired`;
+  const tbody = document.getElementById('inv-tbody');
+  tbody.innerHTML = data.items.map(i => `
+    <tr>
+      <td style="color:var(--text);font-weight:500">${i.item_name}</td>
+      <td style="color:var(--text3)">${i.category}</td>
+      <td style="font-family:'DM Mono'">${i.system_qty}</td>
+      <td style="font-family:'DM Mono'">${i.physical_qty}</td>
+      <td style="font-family:'DM Mono';font-weight:500;color:${i.discrepancy<0?'#f87171':i.discrepancy>0?'var(--accent2)':'#34d399'}">${i.discrepancy>0?'+':''}${i.discrepancy}</td>
+      <td style="font-family:'DM Mono'">₹${Number(i.unit_price).toFixed(2)}</td>
+      <td style="font-family:'DM Mono';font-size:10px;color:${i.status==='expired'?'#f87171':'var(--text2)'}">${i.expiry_date||'—'}</td>
+      <td style="color:var(--text3)">${i.location||'—'}</td>
+      <td><span class="status-badge ${i.status}">${i.status}</span></td>
+      <td style="color:var(--text2)">${i.auditor}</td>
+      <td style="font-size:10px;color:var(--text3);max-width:120px">${i.notes||'—'}</td>
+    </tr>`).join('');
+}
+
+// ── IT ASSETS ─────────────────────────────────────────────────
+async function loadIT() {
+  const { ok, data } = await apiCall('/it-assets');
+  if (!ok) return;
+  const s = data.summary;
+  document.getElementById('it-m-total').textContent  = s.total;
+  document.getElementById('it-m-ok').textContent     = s.operational;
+  document.getElementById('it-m-faulty').textContent = s.faulty + s.under_review + s.maintenance;
+  document.getElementById('it-m-patch').textContent  = s.outdated_patch;
+
+  const tbody = document.getElementById('it-tbody');
+  tbody.innerHTML = data.assets.map(a => {
+    const warExpired = a.warranty_expiry && new Date(a.warranty_expiry) < new Date();
+    return `
+    <tr>
+      <td style="color:var(--text);font-weight:500">${a.asset_name}</td>
+      <td><span style="color:var(--accent2);font-size:10px">${a.asset_type}</span></td>
+      <td style="font-family:'DM Mono';font-size:10px;color:var(--text3)">${a.serial_number||'—'}</td>
+      <td>${a.location}</td>
+      <td style="font-size:10px;color:${warExpired?'#f87171':'var(--text3)'}">${a.warranty_expiry||'—'}${warExpired?' ⚠':''}</td>
+      <td><span class="status-badge ${a.status}">${a.status.replace('_',' ')}</span></td>
+      <td style="font-size:10px;color:var(--text2)">${a.software_license||'—'}</td>
+      <td><span class="status-badge ${a.antivirus_status==='active'?'active':a.antivirus_status==='N/A'?'review':'fail'}">${a.antivirus_status}</span></td>
+      <td><span class="status-badge ${a.patch_status==='updated'?'pass':a.patch_status==='N/A'?'review':'fail'}">${a.patch_status}</span></td>
+      <td style="color:var(--text2);font-size:10px">${a.assigned_to||'—'}</td>
+      <td style="font-size:10px;color:var(--text3);max-width:120px">${a.notes||'—'}</td>
+    </tr>`; }).join('');
+}
+
+// ── LICENSES ─────────────────────────────────────────────────
+async function loadLicenses() {
+  const { ok, data } = await apiCall('/licenses');
+  if (!ok) return;
+  const s = data.summary;
+  document.getElementById('lic-m-valid').textContent   = s.valid;
+  document.getElementById('lic-m-expired').textContent = s.expired;
+  document.getElementById('lic-m-due').textContent     = s.renewal_due;
+  document.getElementById('lic-m-applied').textContent = s.applied || 0;
+  document.getElementById('lic-m-susp').textContent    = s.suspended;
+
+  const alertDiv = document.getElementById('lic-alert-div');
+  alertDiv.innerHTML = s.expired > 0
+    ? `<div class="alert-banner">🚨 <strong>${s.expired} license(s) EXPIRED</strong> — Operating without valid licenses is illegal. Renew immediately!</div>` : '';
+
+  const today = new Date();
+  const tbody  = document.getElementById('lic-tbody');
+  tbody.innerHTML = data.licenses.map(l => {
+    const exp  = new Date(l.expiry_date);
+    const days = Math.ceil((exp - today) / 86400000);
+    let daysLabel, daysStyle;
+    if (days < 0) { daysLabel = `Expired ${Math.abs(days)}d ago`; daysStyle = 'color:#fca5a5;font-weight:500;'; }
+    else if (days <= 30) { daysLabel = `${days}d left`; daysStyle = 'color:#f87171;'; }
+    else if (days <= 90) { daysLabel = `${days}d left`; daysStyle = 'color:var(--gold2);'; }
+    else { daysLabel = `${days}d left`; daysStyle = 'color:#34d399;'; }
+    return `
+    <tr>
+      <td style="color:var(--text);font-weight:500">${l.license_name}</td>
+      <td style="color:var(--text3);font-size:10px">${l.license_type}</td>
+      <td style="color:var(--text2);font-size:10px">${l.authority}</td>
+      <td style="font-family:'DM Mono';font-size:10px;color:var(--text3)">${l.license_number||'—'}</td>
+      <td style="font-family:'DM Mono';font-size:10px">${l.issue_date}</td>
+      <td style="font-family:'DM Mono';font-size:10px">${l.expiry_date}</td>
+      <td style="font-family:'DM Mono';font-size:10px;${daysStyle}">${daysLabel}</td>
+      <td><span class="status-badge ${l.status.replace('_','-')}">${l.status.replace('_',' ')}</span></td>
+      <td style="font-size:10px;color:var(--text3);max-width:140px">${l.notes||'—'}</td>
+    </tr>`; }).join('');
+}
+
+// ── HR ───────────────────────────────────────────────────────
+async function loadHR() {
+  const { ok, data } = await apiCall('/hr');
+  if (!ok) return;
+  const s = data.summary;
+  document.getElementById('hr-m-total').textContent = s.total;
+  document.getElementById('hr-m-pf').textContent    = s.pf_issues;
+  document.getElementById('hr-m-esi').textContent   = s.esi_issues;
+  document.getElementById('hr-m-train').textContent = s.training_due;
+
+  const tbody = document.getElementById('hr-tbody');
+  tbody.innerHTML = data.employees.map(e => `
+    <tr>
+      <td style="font-family:'DM Mono';color:var(--accent2)">${e.employee_id}</td>
+      <td style="font-weight:500;color:var(--text)">${e.employee_name}</td>
+      <td>${e.designation}</td>
+      <td style="color:var(--text3)">${e.department}</td>
+      <td><span class="status-badge ${e.pf_status}">${e.pf_status}</span></td>
+      <td><span class="status-badge ${e.esi_status}">${e.esi_status}</span></td>
+      <td><span class="status-badge ${e.min_wage_status==='compliant'?'pass':'fail'}">${e.min_wage_status.replace('_',' ')}</span></td>
+      <td><span class="status-badge ${e.training_status==='complete'?'pass':'warn'}">${e.training_status}</span></td>
+      <td style="font-family:'DM Mono';color:${e.attendance_pct>=90?'#34d399':'var(--gold2)'}">${e.attendance_pct}%</td>
+      <td style="font-size:10px;color:var(--text3)">${e.remarks||'—'}</td>
+    </tr>`).join('');
+}
+
+// ── COMPLIANCE ───────────────────────────────────────────────
+async function loadCompliance() {
+  const { ok, data } = await apiCall('/compliance');
+  if (!ok) return;
+  const tbody = document.getElementById('comp-tbody');
+  tbody.innerHTML = data.map(c => `
+    <tr>
+      <td style="font-weight:500;color:var(--text)">${c.requirement}</td>
+      <td style="color:var(--accent2)">${c.framework}</td>
+      <td>${c.owner}</td>
+      <td style="color:var(--text3);font-size:10px">${c.authority||'—'}</td>
+      <td style="font-family:'DM Mono';font-size:10px">${c.due_date}</td>
+      <td><span class="status-badge ${c.status}">${c.status}</span></td>
+      <td>
+        <div class="risk-bar"><div class="risk-fill" style="width:${c.score}%;background:${c.score>=80?'linear-gradient(90deg,#10b981,#34d399)':c.score>=50?'linear-gradient(90deg,#f59e0b,#f97316)':'linear-gradient(90deg,#ef4444,#f87171)'}"></div></div>
+        <span style="font-size:10px;color:var(--text3);margin-left:4px">${c.score}%</span>
+      </td>
+    </tr>`).join('');
+}
+
+// ── REPORTS ──────────────────────────────────────────────────
+async function loadReports() {
+  const { ok, data } = await apiCall('/reports');
+  if (!ok) return;
+  const icons = { quarterly:'📊', gst:'🧾', inventory:'📦', it:'💻', hr:'👥', legal:'📋', safety:'🔥', finance:'💰', risk:'⚠️' };
+  const colors = { quarterly:'rgba(59,130,246,0.12)', gst:'rgba(16,185,129,0.12)', inventory:'rgba(245,158,11,0.12)', it:'rgba(139,92,246,0.12)', hr:'rgba(20,184,166,0.12)', safety:'rgba(239,68,68,0.12)', finance:'rgba(16,185,129,0.12)', risk:'rgba(239,68,68,0.12)' };
+  const sbmap  = { finalized:'pass', issues:'fail', review:'warn', pending:'review' };
+  const grid   = document.getElementById('reports-grid');
+  grid.innerHTML = data.map(r => `
+    <div class="report-card">
+      <div class="report-card-icon" style="background:${colors[r.type]||'rgba(59,130,246,0.12)'}">${icons[r.type]||'📄'}</div>
+      <h3>${r.title}</h3>
+      <p>Store audit report — ${r.type} category. Covers compliance findings and recommendations.</p>
+      <div class="report-meta">
+        <span>${r.date}</span>
+        <span class="status-badge ${sbmap[r.status]||'review'}">${r.status}</span>
+      </div>
+    </div>`).join('');
+}
+
+// ── AUDIT RECORDS ────────────────────────────────────────────
+async function loadRecords() {
+  const status = document.getElementById('rec-filter-status')?.value || '';
+  const cat    = document.getElementById('rec-filter-cat')?.value || '';
+  const { ok, data } = await apiCall(`/audits?per_page=20&status=${status}&category=${encodeURIComponent(cat)}`);
+  if (!ok) return;
+  document.getElementById('rec-count').textContent = `${data.total} total records`;
+  const tbody = document.getElementById('rec-tbody');
+  tbody.innerHTML = data.audits.map(a => `
+    <tr>
+      <td style="color:var(--accent2);font-family:'DM Mono';font-size:10px">${a.id}</td>
+      <td style="color:var(--text)">${a.title}</td>
+      <td><span style="font-size:9px;color:var(--text3);background:var(--bg3);padding:2px 7px;border-radius:4px">${a.category||'General'}</span></td>
+      <td style="font-size:10px">${a.auditor}</td>
+      <td style="color:var(--text3)">${a.department}</td>
+      <td style="font-family:'DM Mono';font-size:10px">${a.date}</td>
+      <td><span class="status-badge ${a.status}">${a.status}</span></td>
+      <td><span class="priority-tag ${a.priority}">${a.priority}</span></td>
+      <td><div class="risk-bar"><div class="risk-fill" style="width:${a.risk_score}%;background:${riskColor(a.risk_score)}"></div></div></td>
+      <td class="company-action"><span style="color:#f87171;cursor:pointer;font-size:11px" onclick="deleteAudit('${a.id}')">🗑</span></td>
+    </tr>`).join('');
+}
+
+async function deleteAudit(id) {
+  if (!confirm(`Delete audit ${id}? This cannot be undone.`)) return;
+  const { ok } = await apiCall('/audits/' + id, 'DELETE');
+  if (ok) loadRecords();
+}
+
+// ── USERS ────────────────────────────────────────────────────
+async function loadUsers() {
+  const { ok, data } = await apiCall('/users');
+  if (!ok) return;
+  document.getElementById('users-sub').textContent = `${data.total} registered users`;
+  const tbody = document.getElementById('users-tbody');
+  tbody.innerHTML = data.users.map(u => `
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:9px">
+        <div class="user-avatar" style="width:28px;height:28px;font-size:11px;flex-shrink:0">${u.fname[0]+u.lname[0]}</div>
+        <span style="color:var(--text)">${u.fname} ${u.lname}</span>
+      </div></td>
+      <td style="color:var(--text2)">${u.email}</td>
+      <td><span style="color:${u.role==='company'?'var(--accent2)':'var(--gold2)'};font-size:10px">${u.role==='company'?'Store Admin':'Auditor'}</span></td>
+      <td style="color:var(--text3)">${u.company||'—'}</td>
+      <td style="font-family:'DM Mono';font-size:10px;color:var(--text3)">${fmtAgo(u.last_login)}</td>
+      <td><span class="status-badge pass">Active</span></td>
+      <td class="company-action"><span style="color:#f87171;cursor:pointer;font-size:11px" onclick="deleteUser('${u.id}')">🗑 Remove</span></td>
+    </tr>`).join('');
+}
+
+async function deleteUser(id) {
+  if (!confirm('Remove this user?')) return;
+  const { ok } = await apiCall('/users/' + id, 'DELETE');
+  if (ok) loadUsers();
+}
+
+// ── SETTINGS ─────────────────────────────────────────────────
+function switchSettingsTab(el) {
+  document.querySelectorAll('.settings-nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+async function saveProfile() {
+  const body = {
+    fname:   document.getElementById('set-fname').value,
+    lname:   document.getElementById('set-lname').value,
+    company: document.getElementById('set-store').value || ''
+  };
+  const { ok, data } = await apiCall('/profile', 'PUT', body);
+  if (ok) {
+    currentUser = { ...currentUser, ...data };
+    saveSession(authToken, currentUser);
+    alert('Profile saved!');
+  }
+}
+
+// ── MODAL SAVE FUNCTIONS ──────────────────────────────────────
+function openModal(type) { document.getElementById('modal-'+type).classList.add('open'); }
+function closeModal(type) { document.getElementById('modal-'+type).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m =>
+  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); })
+);
+
+async function saveAudit() {
+  const body = {
+    title:      document.getElementById('ma-title').value,
+    department: document.getElementById('ma-dept').value,
+    category:   document.getElementById('ma-cat').value,
+    priority:   document.getElementById('ma-pri').value,
+    status:     document.getElementById('ma-status').value,
+    risk_score: parseInt(document.getElementById('ma-risk').value) || 50,
+    notes:      document.getElementById('ma-notes').value
+  };
+  if (!body.title || !body.department) { alert('Title and department are required'); return; }
+  const { ok } = await apiCall('/audits', 'POST', body);
+  if (ok) { closeModal('audit'); loadRecords(); loadDashboard(); }
+}
+
+async function saveGST() {
+  const body = {
+    period:      document.getElementById('mg-period').value,
+    gst_number:  document.getElementById('mg-gstin').value,
+    filing_type: document.getElementById('mg-type').value,
+    status:      document.getElementById('mg-status').value,
+    due_date:    document.getElementById('mg-due').value,
+    filed_date:  document.getElementById('mg-filed').value,
+    tax_amount:  parseFloat(document.getElementById('mg-tax').value) || 0,
+    itc_claimed: parseFloat(document.getElementById('mg-itc').value) || 0,
+    remarks:     document.getElementById('mg-remarks').value
+  };
+  if (!body.period || !body.gst_number || !body.due_date) { alert('Period, GST number, and due date are required'); return; }
+  const { ok } = await apiCall('/gst', 'POST', body);
+  if (ok) { closeModal('gst'); loadGST(); }
+}
+
+async function saveInventory() {
+  // Collect all field values
+  const itemName   = document.getElementById('mi-name').value.trim();
+  const category   = document.getElementById('mi-cat').value.trim();
+  const sysQtyRaw  = document.getElementById('mi-sys').value.trim();
+  const phyQtyRaw  = document.getElementById('mi-phy').value.trim();
+  const statusSel  = document.getElementById('mi-status').value; // "" means auto-detect
+
+  // ── Validation ──────────────────────────────────────────────
+  if (!itemName) {
+    showInvModalError('Item Name is required.'); return;
+  }
+  if (!category) {
+    showInvModalError('Category is required.'); return;
+  }
+  if (sysQtyRaw === '' || isNaN(parseInt(sysQtyRaw))) {
+    showInvModalError('System Qty must be a number.'); return;
+  }
+  if (phyQtyRaw === '' || isNaN(parseInt(phyQtyRaw))) {
+    showInvModalError('Physical Qty must be a number.'); return;
+  }
+
+  const sysQty  = parseInt(sysQtyRaw);
+  const phyQty  = parseInt(phyQtyRaw);
+
+  // Build body — only include status if user explicitly picked one (not empty "auto-detect")
+  const body = {
+    item_name:    itemName,
+    category:     category,
+    system_qty:   sysQty,
+    physical_qty: phyQty,
+    unit_price:   parseFloat(document.getElementById('mi-price').value) || 0,
+    location:     document.getElementById('mi-loc').value.trim(),
+    expiry_date:  document.getElementById('mi-exp').value,
+    notes:        document.getElementById('mi-notes').value.trim(),
+    auditor:      currentUser.fname + ' ' + currentUser.lname
+  };
+  // Only send status if not empty — empty means let backend auto-detect
+  if (statusSel && statusSel !== '') {
+    body.status = statusSel;
+  }
+
+  // ── Disable button while saving ──────────────────────────────
+  const saveBtn = document.querySelector('#modal-inventory .modal-save-btn');
+  const origText = saveBtn.textContent;
+  saveBtn.textContent = 'Saving…';
+  saveBtn.disabled = true;
+
+  try {
+    const { ok, data } = await apiCall('/inventory', 'POST', body);
+
+    if (ok) {
+      // Success: clear form, close modal, refresh table
+      ['mi-name','mi-cat','mi-sys','mi-phy','mi-price','mi-loc','mi-exp','mi-notes'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('mi-status').value = '';
+      closeModal('inventory');
+      loadInventory();
+      // Brief toast notification
+      showToast('✅ Inventory entry saved successfully!', 'green');
+    } else {
+      // Show server error inside modal
+      showInvModalError('Save failed: ' + (data.error || 'Unknown error from server.'));
+    }
+  } catch (err) {
+    showInvModalError('Network error — make sure app.py is running on port 5000.');
+  } finally {
+    saveBtn.textContent = origText;
+    saveBtn.disabled = false;
+  }
+}
+
+// Show error message inside the inventory modal
+function showInvModalError(msg) {
+  let errEl = document.getElementById('inv-modal-error');
+  if (!errEl) {
+    errEl = document.createElement('div');
+    errEl.id = 'inv-modal-error';
+    errEl.style.cssText = 'background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:9px 13px;color:#fca5a5;font-size:12px;margin-bottom:12px;';
+    // Insert before the modal footer
+    const footer = document.querySelector('#modal-inventory .modal-footer');
+    footer.parentNode.insertBefore(errEl, footer);
+  }
+  errEl.textContent = msg;
+  errEl.style.display = 'block';
+  setTimeout(() => { errEl.style.display = 'none'; }, 5000);
+}
+
+// Generic toast notification
+function showToast(msg, color) {
+  let toast = document.getElementById('ap-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'ap-toast';
+    toast.style.cssText = 'position:fixed;bottom:90px;right:28px;padding:12px 20px;border-radius:10px;font-size:12px;z-index:9999;font-family:"DM Mono",monospace;box-shadow:0 8px 30px rgba(0,0,0,0.4);transition:opacity 0.3s;';
+    document.body.appendChild(toast);
+  }
+  const colors = {
+    green: 'background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.4);color:#34d399;',
+    red:   'background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.4);color:#f87171;'
+  };
+  toast.style.cssText += colors[color] || colors.green;
+  toast.textContent = msg;
+  toast.style.opacity = '1';
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 3000);
+}
+
+async function saveIT() {
+  const body = {
+    asset_name:       document.getElementById('it-name').value,
+    asset_type:       document.getElementById('it-type').value,
+    serial_number:    document.getElementById('it-serial').value,
+    location:         document.getElementById('it-loc').value,
+    status:           document.getElementById('it-status').value,
+    assigned_to:      document.getElementById('it-user').value,
+    antivirus_status: document.getElementById('it-av').value,
+    patch_status:     document.getElementById('it-patch').value,
+    notes:            document.getElementById('it-notes').value
+  };
+  if (!body.asset_name || !body.location) { alert('Asset name and location are required'); return; }
+  const { ok } = await apiCall('/it-assets', 'POST', body);
+  if (ok) { closeModal('it'); loadIT(); }
+}
+
+async function saveLicense() {
+  const body = {
+    license_name:     document.getElementById('ll-name').value,
+    license_type:     document.getElementById('ll-type').value,
+    authority:        document.getElementById('ll-auth').value,
+    license_number:   document.getElementById('ll-num').value,
+    issue_date:       document.getElementById('ll-issue').value,
+    expiry_date:      document.getElementById('ll-exp').value,
+    status:           document.getElementById('ll-status').value,
+    renewal_reminder: parseInt(document.getElementById('ll-remind').value) || 30,
+    notes:            document.getElementById('ll-notes').value
+  };
+  if (!body.license_name || !body.authority || !body.expiry_date) { alert('Name, authority, and expiry date required'); return; }
+  const { ok } = await apiCall('/licenses', 'POST', body);
+  if (ok) { closeModal('license'); loadLicenses(); }
+}
+
+async function saveHR() {
+  const body = {
+    employee_id:     document.getElementById('hr-id').value,
+    employee_name:   document.getElementById('hr-name').value,
+    designation:     document.getElementById('hr-des').value,
+    department:      document.getElementById('hr-dept').value,
+    joining_date:    document.getElementById('hr-join').value,
+    attendance_pct:  parseFloat(document.getElementById('hr-att').value) || 100,
+    pf_status:       document.getElementById('hr-pf').value,
+    esi_status:      document.getElementById('hr-esi').value,
+    min_wage_status: document.getElementById('hr-wage').value,
+    training_status: document.getElementById('hr-train').value,
+    remarks:         document.getElementById('hr-rem').value
+  };
+  if (!body.employee_id || !body.employee_name) { alert('Employee ID and name are required'); return; }
+  const { ok } = await apiCall('/hr', 'POST', body);
+  if (ok) { closeModal('hr'); loadHR(); }
+}
+
+async function saveCompliance() {
+  const body = {
+    requirement: document.getElementById('co-req').value,
+    framework:   document.getElementById('co-fw').value,
+    owner:       document.getElementById('co-owner').value,
+    authority:   document.getElementById('co-auth').value,
+    due_date:    document.getElementById('co-due').value,
+    status:      document.getElementById('co-status').value
+  };
+  if (!body.requirement || !body.owner || !body.due_date) { alert('Required fields missing'); return; }
+  const { ok } = await apiCall('/compliance', 'POST', body);
+  if (ok) { closeModal('compliance'); loadCompliance(); }
+}
+
+// ── CHATBOT ───────────────────────────────────────────────────
+function getTime() {
+  const d = new Date();
+  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+}
+function addMessage(text, from='bot') {
+  const container = document.getElementById('chat-messages');
+  const initial   = from==='bot' ? '🤖' : (currentUser ? currentUser.fname[0] : 'U');
+  const div       = document.createElement('div');
+  div.className   = 'msg ' + from;
+  div.innerHTML   = `
+    <div class="msg-avatar">${initial}</div>
+    <div>
+      <div class="msg-bubble">${text}</div>
+      <div class="msg-time" style="text-align:${from==='user'?'right':'left'}">${getTime()}</div>
+    </div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+function showTyping() {
+  const c = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg bot'; d.id = 'typing-msg';
+  d.innerHTML = `<div class="msg-avatar">🤖</div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>`;
+  c.appendChild(d); c.scrollTop = c.scrollHeight;
+}
+function removeTyping() { const el = document.getElementById('typing-msg'); if (el) el.remove(); }
+
+async function sendMessage() {
+  const input = document.getElementById('chat-input');
+  const text  = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  document.getElementById('chat-suggestions').style.display = 'none';
+  addMessage(text, 'user');
+  showTyping();
+  const { ok, data } = await apiCall('/chatbot', 'POST', { message: text });
+  removeTyping();
+  addMessage(ok ? data.reply : '⚠️ Cannot reach AuditBot server. Is app.py running?', 'bot');
+}
+function sendSuggestion(el) {
+  document.getElementById('chat-input').value = el.textContent.trim().replace(/^[^\s]+\s/, '');
+  sendMessage();
+}
+function toggleChat() {
+  const win = document.getElementById('chat-window');
+  win.classList.toggle('open');
+  document.querySelector('.chat-notif').style.display = 'none';
+  if (win.classList.contains('open') && document.getElementById('chat-messages').children.length === 0) {
+    setTimeout(() => addMessage(`👋 வணக்கம் <strong>${currentUser ? currentUser.fname : 'there'}</strong>! I'm AuditBot.<br>I'm connected to the live SQLite database. Ask me about:<br>• 🧾 GST filings & ITC<br>• 📦 Inventory shortages & expiry<br>• 📋 License renewals<br>• 👥 HR/PF/ESI status<br>• 💻 IT asset issues`, 'bot'), 300);
+  }
+}
+function initChat() { document.getElementById('chat-messages').innerHTML = ''; }
+
+// ── UTILITIES ────────────────────────────────────────────────
+function riskColor(score) {
+  if (score >= 70) return 'linear-gradient(90deg,#ef4444,#f87171)';
+  if (score >= 40) return 'linear-gradient(90deg,#f59e0b,#fbbf24)';
+  return 'linear-gradient(90deg,#10b981,#34d399)';
+}
+function fmtINR(num) {
+  const n = parseFloat(num) || 0;
+  return n.toLocaleString('en-IN', { maximumFractionDigits: 0 });
+}
+function fmtAgo(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    const now = new Date();
+    const diff = Math.floor((now - d) / 1000);
+    if (diff < 60)   return 'just now';
+    if (diff < 3600) return Math.floor(diff/60) + ' min ago';
+    if (diff < 86400) return Math.floor(diff/3600) + ' hr ago';
+    if (diff < 604800) return Math.floor(diff/86400) + ' days ago';
+    return d.toLocaleDateString('en-IN');
+  } catch { return iso.slice(0, 10); }
+}
+// Chip interactivity for chart cards
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', function() {
+    this.closest('.chart-actions')?.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    this.classList.add('active');
+  });
+});
+</script>
+</body>
+</html>
